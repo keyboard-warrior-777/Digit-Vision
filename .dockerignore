@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Docker ignore file — mirrors .gitignore for Docker context
+#
+# Docker sends everything in the build context to the daemon.
+# Excluding unnecessary files makes builds significantly faster.
+# ─────────────────────────────────────────────────────────────────────────────
+
+.git/
+.gitignore
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Dev tooling — not needed inside the container
+requirements-dev.txt
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Notebooks — not part of the application
+notebooks/
+
+# Documentation — not part of the application
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+LICENSE
+
+# Logs and generated outputs — mounted as volumes at runtime
+logs/
+performance_plots/
+
+# Raw data — mounted as a volume at runtime
+data/raw/
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

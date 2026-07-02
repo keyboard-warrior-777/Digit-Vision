@@ -1,0 +1,97 @@
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# -----------------------------
+# Virtual Environments
+# -----------------------------
+.venv/
+venv/
+env/
+
+# -----------------------------
+# IDE
+# -----------------------------
+.vscode/
+.idea/
+
+# -----------------------------
+# Pytest
+# -----------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+# -----------------------------
+# Ruff / Type Checkers
+# -----------------------------
+.ruff_cache/
+.mypy_cache/
+.pyrefly/
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/*
+!logs/.gitkeep
+*.log
+
+# -----------------------------
+# Streamlit
+# -----------------------------
+.streamlit/secrets.toml
+
+# -----------------------------
+# Models
+# -----------------------------
+models/saved/*
+!models/saved/.gitkeep
+*.keras
+*.h5
+*.weights.h5
+*.ckpt
+
+# -----------------------------
+# Generated plots
+# -----------------------------
+performance_plots/*
+!performance_plots/.gitkeep
+
+# -----------------------------
+# Data
+# -----------------------------
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+data/*
+!data/.gitkeep
+
+# -----------------------------
+# Build
+# -----------------------------
+build/
+dist/
+*.egg-info/
+
+# -----------------------------
+# Operating System
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Environment files
+# -----------------------------
+.env
+.env.*
+
+# -----------------------------
+# Private / Internal
+# -----------------------------
+private/

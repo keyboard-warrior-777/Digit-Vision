@@ -1,0 +1,110 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digitvision"
+version = "1.0.0"
+description = "Handwritten digit recognition with three neural architectures and Grad-CAM explainability"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = "~=3.12.0"
+keywords = [
+    "deep-learning",
+    "computer-vision",
+    "mnist",
+    "cnn",
+    "streamlit",
+    "grad-cam",
+    "lenet",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/keyboard-warrior-777/digitvision"
+"Repository" = "https://github.com/keyboard-warrior-777/digitvision"
+"Bug Tracker" = "https://github.com/keyboard-warrior-777/digitvision/issues"
+
+[project.optional-dependencies]
+# Install dev tools with: pip install -e ".[dev]"
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "black>=24.4",
+    "ruff>=0.4",
+]
+
+# ─── Tool: Setuptools ────────────────────────────────────────────────────────
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "config*"]
+exclude = ["tests*", "notebooks*"]
+
+# ─── Tool: Black ─────────────────────────────────────────────────────────────
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | build
+  | dist
+  | notebooks
+)/
+'''
+
+# ─── Tool: Ruff ──────────────────────────────────────────────────────────────
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = [".git", ".venv", "build", "dist", "notebooks"]
+
+[tool.ruff.lint]
+# E/W = pycodestyle, F = Pyflakes, I = isort, N = pep8-naming
+# UP = pyupgrade, B = flake8-bugbear, SIM = flake8-simplify
+select = ["E", "F", "W", "I", "N", "UP", "B", "SIM"]
+ignore = [
+    "E501",  # line length — Black handles this
+    "B008",  # function calls in default args (needed for Path defaults)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src", "config"]
+
+# ─── Tool: pytest ────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "slow: marks tests as slow (training/evaluation tests)",
+    "unit: marks tests as fast unit tests",
+]
+
+# ─── Tool: coverage ──────────────────────────────────────────────────────────
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*", "notebooks/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 70
+
+[tool.pyrefly]
+project-includes = ["."]
+python-version = "3.12"

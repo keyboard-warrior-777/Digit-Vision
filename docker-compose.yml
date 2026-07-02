@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  digitvision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: digitvision_app
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount these directories so trained models and plots persist
+      # outside the container between restarts.
+      - ./models:/app/models
+      - ./data:/app/data
+      - ./performance_plots:/app/performance_plots
+      - ./logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
