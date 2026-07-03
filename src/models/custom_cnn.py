@@ -82,7 +82,7 @@ def build_custom_cnn(learning_rate: float = 1e-3) -> tf.keras.Model:
     # Two consecutive conv layers before pooling allows the network to compose
     # more complex features than a single layer would permit.
     x = _conv_bn_relu_block(inputs, filters=32, name_prefix="block1_conv1")
-    x = _conv_bn_relu_block(x,      filters=32, name_prefix="block1_conv2")
+    x = _conv_bn_relu_block(x, filters=32, name_prefix="block1_conv2")
     x = tf.keras.layers.MaxPooling2D(pool_size=(2, 2), name="block1_pool")(x)
     x = tf.keras.layers.Dropout(0.25, name="block1_dropout")(x)
 
@@ -105,9 +105,7 @@ def build_custom_cnn(learning_rate: float = 1e-3) -> tf.keras.Model:
     x = tf.keras.layers.Activation("relu", name="dense_relu")(x)
     x = tf.keras.layers.Dropout(0.5, name="dense_dropout")(x)
 
-    outputs = tf.keras.layers.Dense(
-        NUM_CLASSES, activation="softmax", name="output"
-    )(x)
+    outputs = tf.keras.layers.Dense(NUM_CLASSES, activation="softmax", name="output")(x)
 
     model = tf.keras.Model(inputs=inputs, outputs=outputs, name="custom_cnn")
 

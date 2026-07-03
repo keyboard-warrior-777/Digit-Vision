@@ -61,8 +61,7 @@ def build_model(name: str) -> tf.keras.Model:
     if name not in MODEL_REGISTRY:
         valid_names = list(MODEL_REGISTRY.keys())
         raise ValueError(
-            f"Unknown model '{name}'. "
-            f"Valid model names are: {valid_names}"
+            f"Unknown model '{name}'. " f"Valid model names are: {valid_names}"
         )
 
     learning_rate = MODEL_TRAINING_CONFIG[name]["learning_rate"]

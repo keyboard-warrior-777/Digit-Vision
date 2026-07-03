@@ -249,7 +249,13 @@ def _format_per_class_f1_table(f1_scores: dict[str, float]) -> str:
     """Format per-class F1 scores as Markdown table rows."""
     rows = []
     for digit, score in sorted(f1_scores.items(), key=lambda x: int(x[0])):
-        grade = "🟢 Excellent" if score >= 0.99 else "🟡 Good" if score >= 0.97 else "🔴 Needs work"
+        grade = (
+            "🟢 Excellent"
+            if score >= 0.99
+            else "🟡 Good"
+            if score >= 0.97
+            else "🔴 Needs work"
+        )
         rows.append(f"| {digit}     | {score:.4f}   | {grade} |")
     return "\n".join(rows)
 

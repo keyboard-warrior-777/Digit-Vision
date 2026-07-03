@@ -119,7 +119,9 @@ class TestSaveConfusionMatrix:
                 tiny_mnist_data.y_test_labels, predicted, "custom_cnn"
             )
 
-        assert save_path.exists(), f"Confusion matrix file was not created at {save_path}"
+        assert (
+            save_path.exists()
+        ), f"Confusion matrix file was not created at {save_path}"
 
     def test_confusion_matrix_shape(
         self, tmp_path: Path, tiny_mnist_data: MNISTData, fake_predictions
@@ -134,9 +136,7 @@ class TestSaveConfusionMatrix:
         save_path = tmp_path / "cm.npy"
 
         with patch("src.artifacts.CONFUSION_MATRIX_PATHS", {"lenet5": save_path}):
-            _save_confusion_matrix(
-                tiny_mnist_data.y_test_labels, predicted, "lenet5"
-            )
+            _save_confusion_matrix(tiny_mnist_data.y_test_labels, predicted, "lenet5")
 
         loaded_cm = np.load(save_path)
         assert loaded_cm.shape == (10, 10), f"Expected (10, 10), got {loaded_cm.shape}"
@@ -161,9 +161,9 @@ class TestSaveConfusionMatrix:
         cm = np.load(save_path)
         diagonal_sum = np.trace(cm)
         correct_count = int((true == predicted).sum())
-        assert diagonal_sum == correct_count, (
-            f"Diagonal sum ({diagonal_sum}) should equal correct count ({correct_count})"
-        )
+        assert (
+            diagonal_sum == correct_count
+        ), f"Diagonal sum ({diagonal_sum}) should equal correct count ({correct_count})"
 
 
 # ─── _save_raw_metrics ────────────────────────────────────────────────────────
@@ -181,13 +181,12 @@ class TestSaveRawMetrics:
         Prevents: Missing metrics JSON causing empty analytics charts.
         """
         import json
+
         predicted, _ = fake_predictions
         save_path = tmp_path / "metrics.json"
 
         with patch("src.artifacts.RAW_METRICS_PATHS", {"dense_nn": save_path}):
-            _save_raw_metrics(
-                tiny_mnist_data.y_test_labels, predicted, "dense_nn"
-            )
+            _save_raw_metrics(tiny_mnist_data.y_test_labels, predicted, "dense_nn")
 
         assert save_path.exists()
         content = json.loads(save_path.read_text(encoding="utf-8"))
@@ -204,13 +203,12 @@ class TestSaveRawMetrics:
         Prevents: Missing class entries causing chart rendering errors.
         """
         import json
+
         predicted, _ = fake_predictions
         save_path = tmp_path / "metrics.json"
 
         with patch("src.artifacts.RAW_METRICS_PATHS", {"dense_nn": save_path}):
-            _save_raw_metrics(
-                tiny_mnist_data.y_test_labels, predicted, "dense_nn"
-            )
+            _save_raw_metrics(tiny_mnist_data.y_test_labels, predicted, "dense_nn")
 
         content = json.loads(save_path.read_text(encoding="utf-8"))
         for digit in [str(i) for i in range(10)]:
@@ -245,6 +243,7 @@ class TestSaveRocData:
         Prevents: Partial ROC data producing incomplete multi-class ROC chart.
         """
         import json
+
         _, probs = fake_predictions
         save_path = tmp_path / "roc.json"
 
@@ -264,6 +263,7 @@ class TestSaveRocData:
         Prevents: Incomplete ROC entry crashing the chart builder.
         """
         import json
+
         _, probs = fake_predictions
         save_path = tmp_path / "roc.json"
 
@@ -286,6 +286,7 @@ class TestSaveRocData:
         Prevents: Invalid AUC values confusing the reader or breaking the chart scale.
         """
         import json
+
         _, probs = fake_predictions
         save_path = tmp_path / "roc.json"
 
@@ -295,9 +296,9 @@ class TestSaveRocData:
         content = json.loads(save_path.read_text(encoding="utf-8"))
         for digit, entry in content.items():
             auc_val = entry["auc"]
-            assert 0.0 <= auc_val <= 1.0, (
-                f"AUC for class {digit} is {auc_val} — outside [0, 1]"
-            )
+            assert (
+                0.0 <= auc_val <= 1.0
+            ), f"AUC for class {digit} is {auc_val} — outside [0, 1]"
 
 
 # ─── _find_best_example_for_class ────────────────────────────────────────────
@@ -306,18 +307,25 @@ class TestSaveRocData:
 class TestFindBestExampleForClass:
     """Tests for _find_best_example_for_class()."""
 
-    def test_returns_correct_shape(self, stub_cnn_model, tiny_mnist_data: MNISTData) -> None:
+    def test_returns_correct_shape(
+        self, stub_cnn_model, tiny_mnist_data: MNISTData
+    ) -> None:
         """
         What: The returned image has shape (1, 28, 28, 1).
         Why:  The returned array is passed directly to compute_gradcam(), which
               expects exactly this shape.
         Prevents: Shape mismatch causing Grad-CAM to fail on the returned image.
         """
-        result = _find_best_example_for_class(tiny_mnist_data, digit_class=0, model=stub_cnn_model)
+        result = _find_best_example_for_class(
+            tiny_mnist_data, digit_class=0, model=stub_cnn_model
+        )
         if result is not None:
-            assert result.shape == (1, 28, 28, 1), (
-                f"Expected shape (1, 28, 28, 1), got {result.shape}"
-            )
+            assert result.shape == (
+                1,
+                28,
+                28,
+                1,
+            ), f"Expected shape (1, 28, 28, 1), got {result.shape}"
 
     def test_returns_none_for_empty_class(self, stub_cnn_model) -> None:
         """
@@ -333,9 +341,13 @@ class TestFindBestExampleForClass:
         y_onehot = np.eye(10)[y_labels].astype(np.float32)
 
         data = MNISTData(
-            X_train=x, y_train=y_onehot,
-            X_val=x[:10], y_val=y_onehot[:10],
-            X_test=x, y_test=y_onehot, y_test_labels=y_labels,
+            X_train=x,
+            y_train=y_onehot,
+            X_val=x[:10],
+            y_val=y_onehot[:10],
+            X_test=x,
+            y_test=y_onehot,
+            y_test_labels=y_labels,
         )
 
         result = _find_best_example_for_class(data, digit_class=5, model=stub_cnn_model)
@@ -351,11 +363,13 @@ class TestFindBestExampleForClass:
               a tuple, this test will catch it.
         Prevents: Regression to the old (image, None) return type.
         """
-        result = _find_best_example_for_class(tiny_mnist_data, digit_class=0, model=stub_cnn_model)
-        # Result should be ndarray or None — NEVER a tuple
-        assert not isinstance(result, tuple), (
-            "Function should return Optional[np.ndarray], not a tuple"
+        result = _find_best_example_for_class(
+            tiny_mnist_data, digit_class=0, model=stub_cnn_model
         )
+        # Result should be ndarray or None — NEVER a tuple
+        assert not isinstance(
+            result, tuple
+        ), "Function should return Optional[np.ndarray], not a tuple"
 
 
 # ─── _save_mnist_image ────────────────────────────────────────────────────────
@@ -364,7 +378,9 @@ class TestFindBestExampleForClass:
 class TestSaveMnistImage:
     """Tests for the image saving helper."""
 
-    def test_creates_png_file(self, tmp_path: Path, single_mnist_image: np.ndarray) -> None:
+    def test_creates_png_file(
+        self, tmp_path: Path, single_mnist_image: np.ndarray
+    ) -> None:
         """
         What: Saves a valid PNG file at the specified path.
         Why:  The analytics page uses these PNGs as thumbnails. Missing or
@@ -379,7 +395,9 @@ class TestSaveMnistImage:
         assert save_path.exists(), "PNG file was not created"
         assert save_path.suffix == ".png"
 
-    def test_saved_image_is_112x112(self, tmp_path: Path, single_mnist_image: np.ndarray) -> None:
+    def test_saved_image_is_112x112(
+        self, tmp_path: Path, single_mnist_image: np.ndarray
+    ) -> None:
         """
         What: Saved image is 112×112 pixels (upscaled from 28×28).
         Why:  The sample predictions display uses 112×112 thumbnails. Saving
@@ -387,11 +405,10 @@ class TestSaveMnistImage:
         Prevents: Thumbnail size regression producing unusably small images.
         """
         from PIL import Image as PILImage
+
         save_path = tmp_path / "test_digit.png"
         image_array = single_mnist_image[0]
         _save_mnist_image(image_array, save_path)
 
         with PILImage.open(save_path) as img:
-            assert img.size == (112, 112), (
-                f"Expected 112×112 PNG, got {img.size}"
-            )
+            assert img.size == (112, 112), f"Expected 112×112 PNG, got {img.size}"

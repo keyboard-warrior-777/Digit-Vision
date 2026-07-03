@@ -51,10 +51,10 @@ class TestComputeGradcam:
               to visualise. Returning None is the contract for this case.
         Prevents: RuntimeError or AttributeError when Grad-CAM is run on Dense NN.
         """
-        result = compute_gradcam(stub_dense_model, single_mnist_image, predicted_class_index=0)
-        assert result is None, (
-            "Expected None for Dense model (no Conv2D layers)"
+        result = compute_gradcam(
+            stub_dense_model, single_mnist_image, predicted_class_index=0
         )
+        assert result is None, "Expected None for Dense model (no Conv2D layers)"
 
     def test_cnn_model_returns_heatmap(
         self, stub_cnn_model, single_mnist_image: np.ndarray
@@ -65,7 +65,9 @@ class TestComputeGradcam:
               will silently show no heatmap — confusing and incorrect.
         Prevents: Grad-CAM silently failing for valid CNN models.
         """
-        result = compute_gradcam(stub_cnn_model, single_mnist_image, predicted_class_index=0)
+        result = compute_gradcam(
+            stub_cnn_model, single_mnist_image, predicted_class_index=0
+        )
         assert result is not None, "Expected a heatmap for CNN model"
 
     def test_heatmap_shape_is_28x28(
@@ -77,10 +79,13 @@ class TestComputeGradcam:
               be overlaid correctly. Any other shape means the resize step failed.
         Prevents: Shape mismatch between heatmap and image in overlay_heatmap_on_image().
         """
-        heatmap = compute_gradcam(stub_cnn_model, single_mnist_image, predicted_class_index=0)
-        assert heatmap.shape == (28, 28), (
-            f"Expected heatmap shape (28, 28), got {heatmap.shape}"
+        heatmap = compute_gradcam(
+            stub_cnn_model, single_mnist_image, predicted_class_index=0
         )
+        assert heatmap.shape == (
+            28,
+            28,
+        ), f"Expected heatmap shape (28, 28), got {heatmap.shape}"
 
     def test_heatmap_values_in_unit_range(
         self, stub_cnn_model, single_mnist_image: np.ndarray
@@ -92,7 +97,9 @@ class TestComputeGradcam:
               the overlay meaningless.
         Prevents: Unnormalised heatmaps producing invalid colour overlays.
         """
-        heatmap = compute_gradcam(stub_cnn_model, single_mnist_image, predicted_class_index=0)
+        heatmap = compute_gradcam(
+            stub_cnn_model, single_mnist_image, predicted_class_index=0
+        )
         assert heatmap.min() >= 0.0, f"Heatmap min {heatmap.min()} < 0"
         assert heatmap.max() <= 1.0, f"Heatmap max {heatmap.max()} > 1"
 
@@ -107,12 +114,14 @@ class TestComputeGradcam:
               has max = 1.0.
         Prevents: The max_value == 0 edge case producing invalid output.
         """
-        heatmap = compute_gradcam(stub_cnn_model, single_mnist_image, predicted_class_index=0)
+        heatmap = compute_gradcam(
+            stub_cnn_model, single_mnist_image, predicted_class_index=0
+        )
         # A non-trivial input should produce a heatmap with max = 1.0
         if heatmap.max() > 0:  # skip if input produces all-zero gradients
-            assert abs(heatmap.max() - 1.0) < 1e-5, (
-                f"Heatmap maximum should be 1.0 after normalisation, got {heatmap.max()}"
-            )
+            assert (
+                abs(heatmap.max() - 1.0) < 1e-5
+            ), f"Heatmap maximum should be 1.0 after normalisation, got {heatmap.max()}"
 
     def test_all_class_indices_produce_heatmaps(
         self, stub_cnn_model, single_mnist_image: np.ndarray
@@ -154,9 +163,9 @@ class TestFindLastConvLayer:
         """
         layer = _find_last_conv_layer(stub_cnn_model)
         assert layer is not None
-        assert isinstance(layer, tf.keras.layers.Conv2D), (
-            f"Expected Conv2D layer, got {type(layer).__name__}"
-        )
+        assert isinstance(
+            layer, tf.keras.layers.Conv2D
+        ), f"Expected Conv2D layer, got {type(layer).__name__}"
 
     def test_returns_last_not_first_conv_layer(self) -> None:
         """
@@ -176,9 +185,9 @@ class TestFindLastConvLayer:
         model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
         last_conv = _find_last_conv_layer(model)
-        assert last_conv.name == "last_conv", (
-            f"Expected 'last_conv', got '{last_conv.name}'"
-        )
+        assert (
+            last_conv.name == "last_conv"
+        ), f"Expected 'last_conv', got '{last_conv.name}'"
 
 
 # ─── overlay_heatmap_on_image ─────────────────────────────────────────────────
@@ -204,9 +213,11 @@ class TestOverlayHeatmapOnImage:
         Prevents: Grayscale or RGBA output breaking the image display.
         """
         overlay = overlay_heatmap_on_image(sample_heatmap, single_mnist_image)
-        assert overlay.shape == (28, 28, 3), (
-            f"Expected (28, 28, 3), got {overlay.shape}"
-        )
+        assert overlay.shape == (
+            28,
+            28,
+            3,
+        ), f"Expected (28, 28, 3), got {overlay.shape}"
 
     def test_output_dtype_is_uint8(
         self, sample_heatmap: np.ndarray, single_mnist_image: np.ndarray
@@ -229,7 +240,9 @@ class TestOverlayHeatmapOnImage:
               is (1-alpha)*image + alpha*heatmap. With alpha=0, this equals image.
         Prevents: Alpha parameter being ignored in the blending calculation.
         """
-        overlay = overlay_heatmap_on_image(sample_heatmap, single_mnist_image, alpha=0.0)
+        overlay = overlay_heatmap_on_image(
+            sample_heatmap, single_mnist_image, alpha=0.0
+        )
         assert overlay.shape == (28, 28, 3)
         # All channels should be identical (grayscale expanded to RGB)
         assert np.array_equal(overlay[:, :, 0], overlay[:, :, 1])
@@ -251,9 +264,9 @@ class TestOverlayHeatmapOnImage:
             sample_heatmap, single_mnist_image, alpha=1.0
         )
         # The two overlays should be different (heatmap changes colour channels)
-        assert not np.array_equal(overlay_no_heatmap, overlay_full_heatmap), (
-            "alpha=0.0 and alpha=1.0 should produce different results"
-        )
+        assert not np.array_equal(
+            overlay_no_heatmap, overlay_full_heatmap
+        ), "alpha=0.0 and alpha=1.0 should produce different results"
 
     def test_default_alpha_produces_blended_result(
         self, sample_heatmap: np.ndarray, single_mnist_image: np.ndarray

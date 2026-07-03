@@ -135,6 +135,7 @@ def white_pil_image():
         The inversion heuristic being skipped for light-background images.
     """
     from PIL import Image
+
     return Image.fromarray(np.full((28, 28), 255, dtype=np.uint8), mode="L")
 
 
@@ -146,6 +147,7 @@ def dark_pil_image():
     Mean < 127, so no inversion should be applied.
     """
     from PIL import Image
+
     arr = np.zeros((28, 28), dtype=np.uint8)
     arr[10:20, 10:20] = 200  # small bright region (the digit)
     return Image.fromarray(arr, mode="L")
@@ -168,12 +170,18 @@ def stub_dense_model():
         Grad-CAM code crashing instead of gracefully returning None.
     """
     import tensorflow as tf
-    model = tf.keras.Sequential([
-        tf.keras.layers.Input(shape=(28, 28, 1)),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(10, activation="softmax"),
-    ], name="stub_dense")
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.Input(shape=(28, 28, 1)),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(10, activation="softmax"),
+        ],
+        name="stub_dense",
+    )
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
     return model
 
 
@@ -191,12 +199,15 @@ def stub_cnn_model():
         Grad-CAM failures caused by incorrect layer detection logic.
     """
     import tensorflow as tf
+
     inputs = tf.keras.layers.Input(shape=(28, 28, 1))
     x = tf.keras.layers.Conv2D(8, (3, 3), padding="same", activation="relu")(inputs)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     outputs = tf.keras.layers.Dense(10, activation="softmax")(x)
     model = tf.keras.Model(inputs=inputs, outputs=outputs, name="stub_cnn")
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(
+        optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
     return model
 
 
@@ -236,11 +247,12 @@ def sample_history_json(tmp_path: Path) -> Path:
     Used by evaluate.load_training_history() tests.
     """
     import json
+
     history = {
-        "accuracy":     [0.90, 0.93, 0.96, 0.97, 0.98],
+        "accuracy": [0.90, 0.93, 0.96, 0.97, 0.98],
         "val_accuracy": [0.88, 0.91, 0.94, 0.96, 0.97],
-        "loss":         [0.33, 0.24, 0.16, 0.12, 0.09],
-        "val_loss":     [0.38, 0.28, 0.20, 0.15, 0.11],
+        "loss": [0.33, 0.24, 0.16, 0.12, 0.09],
+        "val_loss": [0.38, 0.28, 0.20, 0.15, 0.11],
     }
     path = tmp_path / "test_history.json"
     path.write_text(json.dumps(history, indent=2), encoding="utf-8")
@@ -255,6 +267,7 @@ def sample_metadata_json(tmp_path: Path) -> Path:
     Mimics the format produced by model_card.generate_model_card().
     """
     import json
+
     metadata = {
         "model_name": "custom_cnn",
         "display_name": "Custom CNN",

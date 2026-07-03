@@ -104,9 +104,9 @@ class TestBuildTrainingCallbacks:
               behaviour silently.
         Prevents: Callbacks being accidentally removed or duplicated.
         """
-        assert len(callbacks) == 3, (
-            f"Expected 3 callbacks, got {len(callbacks)}: {[type(c).__name__ for c in callbacks]}"
-        )
+        assert (
+            len(callbacks) == 3
+        ), f"Expected 3 callbacks, got {len(callbacks)}: {[type(c).__name__ for c in callbacks]}"
 
     def test_includes_model_checkpoint(self, callbacks: list) -> None:
         """
@@ -129,9 +129,9 @@ class TestBuildTrainingCallbacks:
         checkpoint = next(
             c for c in callbacks if isinstance(c, tf.keras.callbacks.ModelCheckpoint)
         )
-        assert checkpoint.monitor == "val_accuracy", (
-            f"ModelCheckpoint should monitor 'val_accuracy', monitors '{checkpoint.monitor}'"
-        )
+        assert (
+            checkpoint.monitor == "val_accuracy"
+        ), f"ModelCheckpoint should monitor 'val_accuracy', monitors '{checkpoint.monitor}'"
 
     def test_model_checkpoint_saves_best_only(self, callbacks: list) -> None:
         """
@@ -183,9 +183,9 @@ class TestBuildTrainingCallbacks:
         reduce_lr = next(
             c for c in callbacks if isinstance(c, tf.keras.callbacks.ReduceLROnPlateau)
         )
-        assert reduce_lr.factor == 0.5, (
-            f"ReduceLROnPlateau factor should be 0.5, got {reduce_lr.factor}"
-        )
+        assert (
+            reduce_lr.factor == 0.5
+        ), f"ReduceLROnPlateau factor should be 0.5, got {reduce_lr.factor}"
 
     def test_all_three_callback_types_present(self, callbacks: list) -> None:
         """
@@ -209,10 +209,10 @@ class TestSaveTrainingHistory:
         """Create a Keras History-like mock object."""
         history = MagicMock()
         history.history = {
-            "accuracy":     [np.float32(0.90), np.float32(0.95), np.float32(0.98)],
+            "accuracy": [np.float32(0.90), np.float32(0.95), np.float32(0.98)],
             "val_accuracy": [np.float32(0.88), np.float32(0.93), np.float32(0.97)],
-            "loss":         [np.float32(0.30), np.float32(0.20), np.float32(0.10)],
-            "val_loss":     [np.float32(0.35), np.float32(0.24), np.float32(0.12)],
+            "loss": [np.float32(0.30), np.float32(0.20), np.float32(0.10)],
+            "val_loss": [np.float32(0.35), np.float32(0.24), np.float32(0.12)],
         }
         return history
 
@@ -273,9 +273,9 @@ class TestSaveTrainingHistory:
         saved_val_acc = content["val_accuracy"]
 
         for orig, saved in zip(original_val_acc, saved_val_acc, strict=False):
-            assert abs(orig - saved) < 1e-5, (
-                f"Value mismatch: original={orig}, saved={saved}"
-            )
+            assert (
+                abs(orig - saved) < 1e-5
+            ), f"Value mismatch: original={orig}, saved={saved}"
 
     def test_all_four_metric_keys_saved(self, tmp_path: Path) -> None:
         """

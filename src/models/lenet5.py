@@ -70,7 +70,6 @@ def build_lenet5(learning_rate: float = 1e-3) -> tf.keras.Model:
     model = tf.keras.Sequential(
         [
             tf.keras.layers.Input(shape=INPUT_SHAPE, name="input"),
-
             # ── Stage 1 ──────────────────────────────────────────────────────
             # padding='same' keeps output at 28×28 despite the 5×5 kernel.
             # The original LeNet used 32×32 input; this adaptation makes it
@@ -85,7 +84,6 @@ def build_lenet5(learning_rate: float = 1e-3) -> tf.keras.Model:
             # AveragePooling matches the 1998 original. MaxPooling would
             # perform slightly better, but historical fidelity is the point.
             tf.keras.layers.AveragePooling2D(pool_size=(2, 2), name="pool_1"),
-
             # ── Stage 2 ──────────────────────────────────────────────────────
             # padding='valid' (no padding) matches the original paper.
             # After pooling: 14×14 → (14-5+1)=10 → 10×10×16.
@@ -98,7 +96,6 @@ def build_lenet5(learning_rate: float = 1e-3) -> tf.keras.Model:
                 name="conv_2",
             ),
             tf.keras.layers.AveragePooling2D(pool_size=(2, 2), name="pool_2"),
-
             # ── Classifier ───────────────────────────────────────────────────
             tf.keras.layers.Flatten(name="flatten"),
             tf.keras.layers.Dense(120, activation="relu", name="dense_1"),

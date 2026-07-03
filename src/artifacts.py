@@ -197,7 +197,9 @@ def _save_sample_predictions(
 
     # Sort correct by confidence (take the highest-confidence correct examples)
     correct_confidences = probabilities[correct_indices, y_predicted[correct_indices]]
-    top_correct = correct_indices[np.argsort(correct_confidences)[-_CORRECT_SAMPLE_COUNT:]]
+    top_correct = correct_indices[
+        np.argsort(correct_confidences)[-_CORRECT_SAMPLE_COUNT:]
+    ]
 
     # Take the first N incorrect examples (diverse failures are more informative)
     selected_incorrect = incorrect_indices[:_INCORRECT_SAMPLE_COUNT]
@@ -286,9 +288,7 @@ def _save_gradcam_samples(
     samples_dir.mkdir(parents=True, exist_ok=True)
 
     for digit_class in range(10):
-        image_array = _find_best_example_for_class(
-            data, digit_class, model
-        )
+        image_array = _find_best_example_for_class(data, digit_class, model)
         if image_array is None:
             logger.warning(
                 "Could not find a correct example for digit %d — skipping.",

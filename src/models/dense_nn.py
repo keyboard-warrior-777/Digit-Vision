@@ -60,23 +60,18 @@ def build_dense_nn(learning_rate: float = 1e-3) -> tf.keras.Model:
     model = tf.keras.Sequential(
         [
             tf.keras.layers.Input(shape=INPUT_SHAPE, name="input"),
-
             # Flatten the (28, 28, 1) image into a 784-element vector.
             # All spatial relationships are discarded from this point forward.
             tf.keras.layers.Flatten(name="flatten"),
-
             # Three dense blocks: each halves the width, concentrating features.
             # Dropout after each block prevents co-adaptation between neurons
             # and reduces overfitting.
             tf.keras.layers.Dense(512, activation="relu", name="dense_1"),
             tf.keras.layers.Dropout(0.3, name="dropout_1"),
-
             tf.keras.layers.Dense(256, activation="relu", name="dense_2"),
             tf.keras.layers.Dropout(0.3, name="dropout_2"),
-
             tf.keras.layers.Dense(128, activation="relu", name="dense_3"),
             tf.keras.layers.Dropout(0.2, name="dropout_3"),
-
             # Softmax converts raw scores into probabilities that sum to 1.
             # Required for categorical cross-entropy loss.
             tf.keras.layers.Dense(NUM_CLASSES, activation="softmax", name="output"),

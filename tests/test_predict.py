@@ -185,9 +185,7 @@ class TestLoadModel:
             with pytest.raises(FileNotFoundError, match="not been trained"):
                 _load_model("dense_nn")
 
-    def test_cached_model_returned_on_second_call(
-        self, saved_stub_model: Path
-    ) -> None:
+    def test_cached_model_returned_on_second_call(self, saved_stub_model: Path) -> None:
         """
         What: Second call to _load_model() returns the cached model without
               reloading from disk.
@@ -287,9 +285,7 @@ class TestPredictBatch:
         result = predict_batch([], "custom_cnn")
         assert result == []
 
-    def test_batch_returns_correct_count(
-        self, saved_stub_model: Path
-    ) -> None:
+    def test_batch_returns_correct_count(self, saved_stub_model: Path) -> None:
         """
         What: N input images → N PredictionResults.
         Why:  The batch page displays one result per uploaded image. A mismatch
@@ -297,15 +293,17 @@ class TestPredictBatch:
         Prevents: Off-by-one or indexing errors dropping predictions.
         """
         batch_size = 5
-        images = [np.random.rand(1, 28, 28, 1).astype(np.float32) for _ in range(batch_size)]
+        images = [
+            np.random.rand(1, 28, 28, 1).astype(np.float32) for _ in range(batch_size)
+        ]
         model_name = "custom_cnn"
         with patch("src.predict.MODEL_PATHS", {model_name: saved_stub_model}):
             _model_cache.pop(model_name, None)
             results = predict_batch(images, model_name)
 
-        assert len(results) == batch_size, (
-            f"Expected {batch_size} results, got {len(results)}"
-        )
+        assert (
+            len(results) == batch_size
+        ), f"Expected {batch_size} results, got {len(results)}"
 
     def test_batch_all_results_are_prediction_results(
         self, saved_stub_model: Path

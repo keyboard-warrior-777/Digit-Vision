@@ -35,7 +35,9 @@ from src.preprocessing import canvas_image_to_model_input, uploaded_image_to_mod
 class TestCanvasImageToModelInput:
     """Tests for canvas_image_to_model_input()."""
 
-    def test_valid_canvas_returns_correct_shape(self, valid_canvas_rgba: np.ndarray) -> None:
+    def test_valid_canvas_returns_correct_shape(
+        self, valid_canvas_rgba: np.ndarray
+    ) -> None:
         """
         What: A valid RGBA canvas returns a tensor of shape (1, 28, 28, 1).
         Why:  model.predict() requires exactly this shape. Any other shape
@@ -43,9 +45,12 @@ class TestCanvasImageToModelInput:
         Prevents: Shape errors reaching the model, causing silent wrong predictions.
         """
         result = canvas_image_to_model_input(valid_canvas_rgba)
-        assert result.shape == (1, 28, 28, 1), (
-            f"Expected (1, 28, 28, 1), got {result.shape}"
-        )
+        assert result.shape == (
+            1,
+            28,
+            28,
+            1,
+        ), f"Expected (1, 28, 28, 1), got {result.shape}"
 
     def test_valid_canvas_returns_float32(self, valid_canvas_rgba: np.ndarray) -> None:
         """
@@ -58,7 +63,9 @@ class TestCanvasImageToModelInput:
         result = canvas_image_to_model_input(valid_canvas_rgba)
         assert result.dtype == np.float32
 
-    def test_valid_canvas_values_in_unit_range(self, valid_canvas_rgba: np.ndarray) -> None:
+    def test_valid_canvas_values_in_unit_range(
+        self, valid_canvas_rgba: np.ndarray
+    ) -> None:
         """
         What: All output values are in [0.0, 1.0].
         Why:  The model was trained on normalized data. Values outside [0, 1]
@@ -69,7 +76,9 @@ class TestCanvasImageToModelInput:
         assert result.min() >= 0.0, f"Min value {result.min()} < 0"
         assert result.max() <= 1.0, f"Max value {result.max()} > 1"
 
-    def test_blank_canvas_produces_zero_tensor(self, blank_canvas_rgba: np.ndarray) -> None:
+    def test_blank_canvas_produces_zero_tensor(
+        self, blank_canvas_rgba: np.ndarray
+    ) -> None:
         """
         What: A blank canvas (all-black RGB, no stroke drawn) produces an
               all-zero output tensor (0.0 everywhere).
@@ -82,9 +91,9 @@ class TestCanvasImageToModelInput:
         result = canvas_image_to_model_input(blank_canvas_rgba)
         assert result.shape == (1, 28, 28, 1)
         # Blank canvas: all RGB=0 -> grayscale=0 -> normalized=0.0
-        assert result.max() == 0.0, (
-            f"Blank canvas should produce all-zero output (0.0), got max={result.max()}"
-        )
+        assert (
+            result.max() == 0.0
+        ), f"Blank canvas should produce all-zero output (0.0), got max={result.max()}"
 
     def test_invalid_shape_rgb_raises_value_error(self) -> None:
         """
@@ -120,7 +129,9 @@ class TestCanvasImageToModelInput:
         bad_input = np.zeros((280, 280, 3), dtype=np.uint8)
         with pytest.raises(ValueError) as exc_info:
             canvas_image_to_model_input(bad_input)
-        assert "280" in str(exc_info.value), "Error message should contain the bad shape"
+        assert "280" in str(
+            exc_info.value
+        ), "Error message should contain the bad shape"
 
     def test_different_canvas_sizes_produce_28x28_output(self) -> None:
         """
@@ -174,7 +185,9 @@ class TestCanvasImageToModelInput:
 class TestUploadedImageToModelInput:
     """Tests for uploaded_image_to_model_input()."""
 
-    def test_light_background_image_is_inverted(self, white_pil_image: Image.Image) -> None:
+    def test_light_background_image_is_inverted(
+        self, white_pil_image: Image.Image
+    ) -> None:
         """
         What: An all-white image (mean > 127) is inverted.
         Why:  Scanned documents and photos of handwriting have dark digits
@@ -184,11 +197,13 @@ class TestUploadedImageToModelInput:
         """
         result = uploaded_image_to_model_input(white_pil_image)
         # After inverting a white image, all pixels should be 0.0 (black)
-        assert result.max() < 0.01, (
-            f"Inverted white image should be near-zero, max={result.max():.3f}"
-        )
+        assert (
+            result.max() < 0.01
+        ), f"Inverted white image should be near-zero, max={result.max():.3f}"
 
-    def test_dark_background_image_is_not_inverted(self, dark_pil_image: Image.Image) -> None:
+    def test_dark_background_image_is_not_inverted(
+        self, dark_pil_image: Image.Image
+    ) -> None:
         """
         What: A dark image (mean < 127) is NOT inverted.
         Why:  An image already in MNIST format (white digit on black) should
@@ -250,9 +265,7 @@ class TestUploadedImageToModelInput:
         Why:  Identical to the canvas normalisation requirement.
         Prevents: Unnormalized inputs being passed to the model.
         """
-        mid_gray = Image.fromarray(
-            np.full((28, 28), 128, dtype=np.uint8), mode="L"
-        )
+        mid_gray = Image.fromarray(np.full((28, 28), 128, dtype=np.uint8), mode="L")
         result = uploaded_image_to_model_input(mid_gray)
         assert result.min() >= 0.0
         assert result.max() <= 1.0
@@ -264,8 +277,6 @@ class TestUploadedImageToModelInput:
               crashing or producing wrong output shapes.
         Prevents: Memory errors or shape errors on large image uploads.
         """
-        large_img = Image.fromarray(
-            np.zeros((1024, 1024), dtype=np.uint8), mode="L"
-        )
+        large_img = Image.fromarray(np.zeros((1024, 1024), dtype=np.uint8), mode="L")
         result = uploaded_image_to_model_input(large_img)
         assert result.shape == (1, 28, 28, 1)

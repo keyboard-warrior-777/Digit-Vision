@@ -164,9 +164,7 @@ def create_augmented_generator(
     Returns:
         A fitted NumpyArrayIterator yielding augmented (X, y) batches.
     """
-    generator = tf.keras.preprocessing.image.ImageDataGenerator(
-        **AUGMENTATION_CONFIG
-    )
+    generator = tf.keras.preprocessing.image.ImageDataGenerator(**AUGMENTATION_CONFIG)
     generator.fit(x, seed=RANDOM_SEED)
 
     return generator.flow(x, y, batch_size=batch_size, seed=RANDOM_SEED)

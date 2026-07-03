@@ -40,9 +40,11 @@ class TestModelRegistry:
         Prevents: A model being dropped from the registry without anyone noticing.
         """
         models = list_available_models()
-        assert set(models) == {"dense_nn", "lenet5", "custom_cnn"}, (
-            f"Expected three specific models, got: {models}"
-        )
+        assert set(models) == {
+            "dense_nn",
+            "lenet5",
+            "custom_cnn",
+        }, f"Expected three specific models, got: {models}"
 
     def test_list_available_models_preserves_order(self) -> None:
         """
@@ -134,9 +136,9 @@ class TestDenseNN:
         Prevents: Silent architecture changes breaking the educational comparison.
         """
         n_params = self.model.count_params()
-        assert 400_000 <= n_params <= 700_000, (
-            f"Dense NN parameter count {n_params:,} is out of expected range [400K, 700K]"
-        )
+        assert (
+            400_000 <= n_params <= 700_000
+        ), f"Dense NN parameter count {n_params:,} is out of expected range [400K, 700K]"
 
     def test_has_no_conv2d_layers(self) -> None:
         """
@@ -147,10 +149,14 @@ class TestDenseNN:
               educational narrative.
         Prevents: Unexpected Grad-CAM output for the Dense NN.
         """
-        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
-        assert len(conv_layers) == 0, (
-            f"Dense NN should have no Conv2D layers, found: {[layer.name for layer in conv_layers]}"
-        )
+        conv_layers = [
+            layer
+            for layer in self.model.layers
+            if isinstance(layer, tf.keras.layers.Conv2D)
+        ]
+        assert (
+            len(conv_layers) == 0
+        ), f"Dense NN should have no Conv2D layers, found: {[layer.name for layer in conv_layers]}"
 
     def test_is_compiled(self) -> None:
         """
@@ -196,10 +202,14 @@ class TestLeNet5:
               is no longer LeNet-5.
         Prevents: Accidentally flattening LeNet-5 into a Dense network.
         """
-        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
-        assert len(conv_layers) >= 2, (
-            f"LeNet-5 should have at least 2 Conv2D layers, found {len(conv_layers)}"
-        )
+        conv_layers = [
+            layer
+            for layer in self.model.layers
+            if isinstance(layer, tf.keras.layers.Conv2D)
+        ]
+        assert (
+            len(conv_layers) >= 2
+        ), f"LeNet-5 should have at least 2 Conv2D layers, found {len(conv_layers)}"
 
     def test_parameter_count_in_expected_range(self) -> None:
         """
@@ -210,9 +220,9 @@ class TestLeNet5:
               parameter-efficiency comparison).
         """
         n_params = self.model.count_params()
-        assert 40_000 <= n_params <= 90_000, (
-            f"LeNet-5 parameter count {n_params:,} out of expected range [40K, 90K]"
-        )
+        assert (
+            40_000 <= n_params <= 90_000
+        ), f"LeNet-5 parameter count {n_params:,} out of expected range [40K, 90K]"
 
     def test_output_probabilities_sum_to_one(self) -> None:
         """What: Softmax outputs sum to 1. Prevents: missing softmax activation."""
@@ -248,10 +258,14 @@ class TestCustomCNN:
               is missing, the model is shallower and less accurate.
         Prevents: Accidentally building a one-block CNN instead of two-block.
         """
-        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
-        assert len(conv_layers) >= 4, (
-            f"Custom CNN should have at least 4 Conv2D layers, found {len(conv_layers)}"
-        )
+        conv_layers = [
+            layer
+            for layer in self.model.layers
+            if isinstance(layer, tf.keras.layers.Conv2D)
+        ]
+        assert (
+            len(conv_layers) >= 4
+        ), f"Custom CNN should have at least 4 Conv2D layers, found {len(conv_layers)}"
 
     def test_has_batch_normalization_layers(self) -> None:
         """
@@ -261,12 +275,13 @@ class TestCustomCNN:
         Prevents: Accidentally removing BatchNorm during refactoring.
         """
         bn_layers = [
-            layer for layer in self.model.layers
+            layer
+            for layer in self.model.layers
             if isinstance(layer, tf.keras.layers.BatchNormalization)
         ]
-        assert len(bn_layers) >= 3, (
-            f"Expected ≥3 BatchNorm layers, found {len(bn_layers)}"
-        )
+        assert (
+            len(bn_layers) >= 3
+        ), f"Expected ≥3 BatchNorm layers, found {len(bn_layers)}"
 
     def test_has_global_average_pooling(self) -> None:
         """
@@ -277,12 +292,13 @@ class TestCustomCNN:
         Prevents: GlobalAvgPool being replaced with Flatten during editing.
         """
         gap_layers = [
-            layer for layer in self.model.layers
+            layer
+            for layer in self.model.layers
             if isinstance(layer, tf.keras.layers.GlobalAveragePooling2D)
         ]
-        assert len(gap_layers) == 1, (
-            f"Expected exactly 1 GlobalAveragePooling2D, found {len(gap_layers)}"
-        )
+        assert (
+            len(gap_layers) == 1
+        ), f"Expected exactly 1 GlobalAveragePooling2D, found {len(gap_layers)}"
 
     def test_parameter_count_smaller_than_dense_nn(self) -> None:
         """
@@ -294,9 +310,9 @@ class TestCustomCNN:
         """
         dense_params = build_model("dense_nn").count_params()
         cnn_params = self.model.count_params()
-        assert cnn_params < dense_params, (
-            f"Custom CNN ({cnn_params:,}) should have fewer params than Dense NN ({dense_params:,})"
-        )
+        assert (
+            cnn_params < dense_params
+        ), f"Custom CNN ({cnn_params:,}) should have fewer params than Dense NN ({dense_params:,})"
 
     def test_parameter_count_in_expected_range(self) -> None:
         """
@@ -305,9 +321,9 @@ class TestCustomCNN:
               suggests Flatten was used instead of GAP.
         """
         n_params = self.model.count_params()
-        assert 50_000 <= n_params <= 120_000, (
-            f"Custom CNN parameter count {n_params:,} out of expected range [50K, 120K]"
-        )
+        assert (
+            50_000 <= n_params <= 120_000
+        ), f"Custom CNN parameter count {n_params:,} out of expected range [50K, 120K]"
 
     def test_batch_prediction_output_shape(self) -> None:
         """

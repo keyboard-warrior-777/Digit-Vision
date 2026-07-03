@@ -161,14 +161,15 @@ def _has_light_background(grayscale: np.ndarray) -> bool:
     """
     patch = 5  # 5×5 pixels per corner
     h, w = grayscale.shape
-    corners = np.array([
-        grayscale[:patch, :patch],          # top-left
-        grayscale[:patch, w - patch:],       # top-right
-        grayscale[h - patch:, :patch],       # bottom-left
-        grayscale[h - patch:, w - patch:],   # bottom-right
-    ])
+    corners = np.array(
+        [
+            grayscale[:patch, :patch],  # top-left
+            grayscale[:patch, w - patch :],  # top-right
+            grayscale[h - patch :, :patch],  # bottom-left
+            grayscale[h - patch :, w - patch :],  # bottom-right
+        ]
+    )
     return float(corners.mean()) > 127
-
 
 
 def _extract_alpha_channel(rgba_image: np.ndarray) -> np.ndarray:

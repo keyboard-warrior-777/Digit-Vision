@@ -87,9 +87,7 @@ class ModelEvaluation:
     f1_chart_path: Path
 
 
-def evaluate_model(
-    model_name: str, data: MNISTData | None = None
-) -> ModelEvaluation:
+def evaluate_model(model_name: str, data: MNISTData | None = None) -> ModelEvaluation:
     """
     Load a trained model, evaluate it on the test set, and save plots.
 
@@ -299,7 +297,9 @@ def _save_f1_bar_chart(
     with plt.style.context(PLOT_STYLE):
         fig, ax = plt.subplots(figsize=(10, 6))
 
-        bars = ax.barh(digits, scores, color=bar_colours, edgecolor="white", linewidth=0.5)
+        bars = ax.barh(
+            digits, scores, color=bar_colours, edgecolor="white", linewidth=0.5
+        )
         ax.set_xlim(0.93, 1.005)
         ax.set_xlabel("F1 Score", fontsize=12)
         ax.set_ylabel("Digit Class", fontsize=12)
@@ -337,13 +337,13 @@ def _save_training_curves_plot(model_names: list[str]) -> None:
     """
     # Assign distinct colours so the three lines are immediately distinguishable
     line_colours = {
-        "dense_nn":   "#60a5fa",  # blue
-        "lenet5":     "#f59e0b",  # amber
+        "dense_nn": "#60a5fa",  # blue
+        "lenet5": "#f59e0b",  # amber
         "custom_cnn": "#34d399",  # green
     }
     display_labels = {
-        "dense_nn":   "Dense NN",
-        "lenet5":     "LeNet-5",
+        "dense_nn": "Dense NN",
+        "lenet5": "LeNet-5",
         "custom_cnn": "Custom CNN",
     }
 
@@ -405,8 +405,9 @@ def _compute_per_class_f1(
         average=None,
         labels=list(range(10)),
     )
-    return {digit: float(score) for digit, score in zip(CLASS_NAMES, scores, strict=False)}
-
+    return {
+        digit: float(score) for digit, score in zip(CLASS_NAMES, scores, strict=False)
+    }
 
 
 # ─── CLI entry point ────────────────────────────────────────────────────────────

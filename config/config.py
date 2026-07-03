@@ -97,7 +97,7 @@ CLASS_NAMES: list[str] = [str(i) for i in range(NUM_CLASSES)]
 
 # ─── Training ─────────────────────────────────────────────────────────────────
 RANDOM_SEED: int = 42
-VALIDATION_SPLIT: float = 0.1   # 10% of training data used for validation
+VALIDATION_SPLIT: float = 0.1  # 10% of training data used for validation
 BATCH_SIZE: int = 128
 EPOCHS: int = 20
 LEARNING_RATE: float = 1e-3
@@ -126,9 +126,9 @@ MODEL_TRAINING_CONFIG: dict[str, dict] = {
 # Interview: "Augmentation makes the model robust to slight rotations and
 # shifts — which is exactly how real users draw digits on a canvas."
 AUGMENTATION_CONFIG: dict[str, float] = {
-    "rotation_range": 10,       # degrees
-    "zoom_range": 0.1,          # ±10%
-    "width_shift_range": 0.1,   # ±10% of image width
+    "rotation_range": 10,  # degrees
+    "zoom_range": 0.1,  # ±10%
+    "width_shift_range": 0.1,  # ±10% of image width
     "height_shift_range": 0.1,  # ±10% of image height
 }
 
