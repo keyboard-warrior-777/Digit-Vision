@@ -21,7 +21,7 @@ Tests in this file:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import numpy as np
 import pytest
@@ -65,9 +65,9 @@ class TestLoadTrainingHistory:
 
         for key, values in history.items():
             assert isinstance(values, list), f"'{key}' should be a list"
-            assert all(
-                isinstance(v, float) for v in values
-            ), f"All values in '{key}' should be float"
+            assert all(isinstance(v, float) for v in values), (
+                f"All values in '{key}' should be float"
+            )
 
     def test_returns_none_for_missing_model(self) -> None:
         """
@@ -105,9 +105,9 @@ class TestLoadTrainingHistory:
 
         lengths = {key: len(vals) for key, vals in history.items()}
         unique_lengths = set(lengths.values())
-        assert (
-            len(unique_lengths) == 1
-        ), f"All history lists should have same length: {lengths}"
+        assert len(unique_lengths) == 1, (
+            f"All history lists should have same length: {lengths}"
+        )
 
 
 # ─── _compute_per_class_f1 ────────────────────────────────────────────────────
@@ -154,9 +154,9 @@ class TestComputePerClassF1:
         pred = true.copy()
         result = _compute_per_class_f1(true, pred)
         for digit, score in result.items():
-            assert (
-                abs(score - 1.0) < 1e-6
-            ), f"Perfect predictions should give F1=1.0 for digit {digit}, got {score}"
+            assert abs(score - 1.0) < 1e-6, (
+                f"Perfect predictions should give F1=1.0 for digit {digit}, got {score}"
+            )
 
     def test_all_wrong_predictions_give_f1_zero(self) -> None:
         """
@@ -186,9 +186,9 @@ class TestComputePerClassF1:
         pred = true.copy()
         result = _compute_per_class_f1(true, pred)
         for digit, score in result.items():
-            assert isinstance(
-                score, float
-            ), f"F1 score for '{digit}' should be Python float, got {type(score).__name__}"
+            assert isinstance(score, float), (
+                f"F1 score for '{digit}' should be Python float, got {type(score).__name__}"
+            )
 
 
 # ─── ModelEvaluation dataclass ────────────────────────────────────────────────
@@ -241,3 +241,134 @@ class TestEvaluateModelErrorHandling:
             pytest.raises(FileNotFoundError, match="Train it first"),
         ):
             evaluate_model("dense_nn")
+
+    def test_evaluate_model_success(self, tmp_path: Path) -> None:
+        from src.evaluate import evaluate_model
+
+        mock_data = MagicMock()
+        mock_data.X_test = np.zeros((10, 28, 28, 1))
+        mock_data.y_test = np.zeros((10, 10))
+        mock_data.y_test_labels = np.arange(10)
+
+        mock_model = MagicMock()
+        mock_model.evaluate.return_value = (0.5, 0.9)
+        mock_model.predict.return_value = np.eye(10)
+
+        model_file = tmp_path / "dummy.keras"
+        model_file.touch()
+
+        with (
+            patch("src.evaluate.MODEL_PATHS", {"dummy": model_file}),
+            patch("src.evaluate.load_and_prepare_mnist", return_value=mock_data),
+            patch("src.evaluate.tf.keras.models.load_model", return_value=mock_model),
+            patch("src.evaluate.generate_all_artifacts") as mock_artifacts,
+            patch(
+                "src.evaluate._save_confusion_matrix_plot", return_value=Path("cm.png")
+            ),
+            patch("src.evaluate._save_f1_bar_chart", return_value=Path("f1.png")),
+        ):
+            result = evaluate_model("dummy")
+
+            assert result.model_name == "dummy"
+            assert result.test_accuracy == 0.9
+            assert result.test_loss == 0.5
+            mock_artifacts.assert_called_once()
+
+    def test_evaluate_model_artifact_exception(self, tmp_path: Path) -> None:
+        from src.evaluate import evaluate_model
+
+        mock_data = MagicMock()
+        mock_data.X_test = np.zeros((10, 28, 28, 1))
+        mock_data.y_test = np.zeros((10, 10))
+        mock_data.y_test_labels = np.arange(10)
+
+        mock_model = MagicMock()
+        mock_model.evaluate.return_value = (0.5, 0.9)
+        mock_model.predict.return_value = np.eye(10)
+
+        model_file = tmp_path / "dummy.keras"
+        model_file.touch()
+
+        with (
+            patch("src.evaluate.MODEL_PATHS", {"dummy": model_file}),
+            patch("src.evaluate.load_and_prepare_mnist", return_value=mock_data),
+            patch("src.evaluate.tf.keras.models.load_model", return_value=mock_model),
+            patch(
+                "src.evaluate.generate_all_artifacts", side_effect=OSError("test error")
+            ),
+            patch(
+                "src.evaluate._save_confusion_matrix_plot", return_value=Path("cm.png")
+            ),
+            patch("src.evaluate._save_f1_bar_chart", return_value=Path("f1.png")),
+        ):
+            result = evaluate_model("dummy", data=mock_data)
+            assert result.test_accuracy == 0.9
+
+    def test_evaluate_all_models(self) -> None:
+        from src.evaluate import evaluate_all_models
+
+        with (
+            patch("src.evaluate.load_and_prepare_mnist"),
+            patch(
+                "src.evaluate.list_available_models", return_value=["modelA", "modelB"]
+            ),
+            patch("src.evaluate.evaluate_model") as mock_eval,
+            patch("src.evaluate._save_training_curves_plot") as mock_curves,
+        ):
+            mock_eval.side_effect = ["resA", FileNotFoundError("no model")]
+
+            results = evaluate_all_models()
+
+            assert "modelA" in results
+            assert "modelB" not in results
+            mock_curves.assert_called_once_with(["modelA"])
+
+    def test_save_confusion_matrix_plot(self, tmp_path: Path) -> None:
+        from src.evaluate import _save_confusion_matrix_plot
+
+        true_labels = np.array([0, 1])
+        pred_labels = np.array([0, 1])
+
+        with patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path):
+            path = _save_confusion_matrix_plot(true_labels, pred_labels, "test_model")
+            assert path.exists()
+            assert path.name == "confusion_matrix_test_model.png"
+
+    def test_save_f1_bar_chart(self, tmp_path: Path) -> None:
+        from src.evaluate import _save_f1_bar_chart
+
+        scores = {"0": 0.995, "1": 0.975, "2": 0.90}
+
+        with patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path):
+            path = _save_f1_bar_chart(scores, "test_model")
+            assert path.exists()
+            assert path.name == "f1_per_class_test_model.png"
+
+    def test_save_training_curves_plot(self, tmp_path: Path) -> None:
+        from src.evaluate import _save_training_curves_plot
+
+        history = {
+            "accuracy": [0.8, 0.9],
+            "val_accuracy": [0.85, 0.92],
+            "loss": [0.5, 0.2],
+            "val_loss": [0.4, 0.3],
+        }
+
+        with (
+            patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path),
+            patch("src.evaluate.load_training_history", return_value=history),
+        ):
+            path = _save_training_curves_plot(["modelA", "modelB"])
+            # _save_training_curves_plot returns None
+            assert (tmp_path / "training_curves.png").exists()
+
+    def test_save_training_curves_missing_history(self, tmp_path: Path) -> None:
+        from src.evaluate import _save_training_curves_plot
+
+        with (
+            patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path),
+            patch("src.evaluate.load_training_history", return_value=None),
+        ):
+            path = _save_training_curves_plot(["modelA"])
+            # The file is still created even if there is no history (as an empty plot)
+            assert (tmp_path / "training_curves.png").exists()
