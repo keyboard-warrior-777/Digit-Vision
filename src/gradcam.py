@@ -37,8 +37,6 @@ Reference:
 
 from __future__ import annotations
 
-from typing import Optional
-
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -52,7 +50,7 @@ def compute_gradcam(
     model: tf.keras.Model,
     preprocessed_image: np.ndarray,
     predicted_class_index: int,
-) -> Optional[np.ndarray]:
+) -> np.ndarray | None:
     """
     Compute a Grad-CAM heatmap for the given model, image, and prediction.
 
@@ -128,7 +126,7 @@ def overlay_heatmap_on_image(
 
 def _find_last_conv_layer(
     model: tf.keras.Model,
-) -> Optional[tf.keras.layers.Layer]:
+) -> tf.keras.layers.Layer | None:
     """
     Find the last Conv2D layer in the model by searching backwards.
 

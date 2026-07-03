@@ -26,10 +26,8 @@ import json
 import platform
 import subprocess
 import sys
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import tensorflow as tf
 
@@ -50,8 +48,8 @@ logger = get_logger(__name__)
 
 def generate_model_card(
     model_name: str,
-    training_result: "TrainingResult",
-    evaluation_result: "ModelEvaluation",
+    training_result: TrainingResult,
+    evaluation_result: ModelEvaluation,
     training_time_seconds: float,
     model: tf.keras.Model,
 ) -> None:
@@ -76,7 +74,7 @@ def generate_model_card(
     )
 
 
-def load_metadata(model_name: str) -> Optional[dict]:
+def load_metadata(model_name: str) -> dict | None:
     """
     Load the saved metadata JSON for a model.
 
@@ -102,8 +100,8 @@ def load_metadata(model_name: str) -> Optional[dict]:
 
 def _save_metadata_json(
     model_name: str,
-    training_result: "TrainingResult",
-    evaluation_result: "ModelEvaluation",
+    training_result: TrainingResult,
+    evaluation_result: ModelEvaluation,
     training_time_seconds: float,
     model: tf.keras.Model,
 ) -> None:
@@ -113,7 +111,7 @@ def _save_metadata_json(
         "model_name": model_name,
         "display_name": MODEL_DISPLAY_NAMES.get(model_name, model_name),
         "dataset": "MNIST",
-        "date_trained": datetime.now(tz=timezone.utc).isoformat(),
+        "date_trained": datetime.now(tz=UTC).isoformat(),
         # Architecture
         "total_parameters": model.count_params(),
         "trainable_parameters": sum(
@@ -154,8 +152,8 @@ def _save_metadata_json(
 
 def _save_summary_markdown(
     model_name: str,
-    training_result: "TrainingResult",
-    evaluation_result: "ModelEvaluation",
+    training_result: TrainingResult,
+    evaluation_result: ModelEvaluation,
     training_time_seconds: float,
     model: tf.keras.Model,
 ) -> None:
@@ -174,7 +172,7 @@ def _save_summary_markdown(
 
     markdown = f"""# Model Card — {display_name}
 
-> Auto-generated after training and evaluation. Last updated: {datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")}
+> Auto-generated after training and evaluation. Last updated: {datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M UTC")}
 
 ---
 
@@ -344,7 +342,7 @@ def _get_batch_size_from_config(model_name: str) -> int:
     return MODEL_TRAINING_CONFIG.get(model_name, {}).get("batch_size", 128)
 
 
-def _get_git_commit() -> Optional[str]:
+def _get_git_commit() -> str | None:
     """Return the current git commit hash, or None if git is not available."""
     try:
         result = subprocess.run(

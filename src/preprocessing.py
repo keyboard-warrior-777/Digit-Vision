@@ -28,8 +28,8 @@ Interview Note:
 
 from __future__ import annotations
 
-import numpy as np
 import cv2
+import numpy as np
 from PIL import Image
 
 from config.config import IMAGE_SIZE

@@ -26,7 +26,6 @@ import tensorflow as tf
 
 from src.models import build_model, list_available_models
 
-
 # ─── Registry ────────────────────────────────────────────────────────────────
 
 
@@ -148,9 +147,9 @@ class TestDenseNN:
               educational narrative.
         Prevents: Unexpected Grad-CAM output for the Dense NN.
         """
-        conv_layers = [l for l in self.model.layers if isinstance(l, tf.keras.layers.Conv2D)]
+        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
         assert len(conv_layers) == 0, (
-            f"Dense NN should have no Conv2D layers, found: {[l.name for l in conv_layers]}"
+            f"Dense NN should have no Conv2D layers, found: {[layer.name for layer in conv_layers]}"
         )
 
     def test_is_compiled(self) -> None:
@@ -197,7 +196,7 @@ class TestLeNet5:
               is no longer LeNet-5.
         Prevents: Accidentally flattening LeNet-5 into a Dense network.
         """
-        conv_layers = [l for l in self.model.layers if isinstance(l, tf.keras.layers.Conv2D)]
+        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
         assert len(conv_layers) >= 2, (
             f"LeNet-5 should have at least 2 Conv2D layers, found {len(conv_layers)}"
         )
@@ -249,7 +248,7 @@ class TestCustomCNN:
               is missing, the model is shallower and less accurate.
         Prevents: Accidentally building a one-block CNN instead of two-block.
         """
-        conv_layers = [l for l in self.model.layers if isinstance(l, tf.keras.layers.Conv2D)]
+        conv_layers = [layer for layer in self.model.layers if isinstance(layer, tf.keras.layers.Conv2D)]
         assert len(conv_layers) >= 4, (
             f"Custom CNN should have at least 4 Conv2D layers, found {len(conv_layers)}"
         )
@@ -262,8 +261,8 @@ class TestCustomCNN:
         Prevents: Accidentally removing BatchNorm during refactoring.
         """
         bn_layers = [
-            l for l in self.model.layers
-            if isinstance(l, tf.keras.layers.BatchNormalization)
+            layer for layer in self.model.layers
+            if isinstance(layer, tf.keras.layers.BatchNormalization)
         ]
         assert len(bn_layers) >= 3, (
             f"Expected ≥3 BatchNorm layers, found {len(bn_layers)}"
@@ -278,8 +277,8 @@ class TestCustomCNN:
         Prevents: GlobalAvgPool being replaced with Flatten during editing.
         """
         gap_layers = [
-            l for l in self.model.layers
-            if isinstance(l, tf.keras.layers.GlobalAveragePooling2D)
+            layer for layer in self.model.layers
+            if isinstance(layer, tf.keras.layers.GlobalAveragePooling2D)
         ]
         assert len(gap_layers) == 1, (
             f"Expected exactly 1 GlobalAveragePooling2D, found {len(gap_layers)}"

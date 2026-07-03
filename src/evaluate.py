@@ -309,7 +309,7 @@ def _save_f1_bar_chart(
             pad=15,
         )
 
-        for bar, score in zip(bars, scores):
+        for bar, score in zip(bars, scores, strict=False):
             ax.text(
                 bar.get_width() + 0.001,
                 bar.get_y() + bar.get_height() / 2,
@@ -405,7 +405,7 @@ def _compute_per_class_f1(
         average=None,
         labels=list(range(10)),
     )
-    return {digit: float(score) for digit, score in zip(CLASS_NAMES, scores)}
+    return {digit: float(score) for digit, score in zip(CLASS_NAMES, scores, strict=False)}
 
 
 

@@ -9,21 +9,17 @@ from __future__ import annotations
 
 import numpy as np
 import streamlit as st
-from PIL import Image
-
 from components.cards import info_box, metric_card, page_header
 from components.charts import build_class_distribution_chart
-from components.styles import get_global_css
-
-from config.config import CLASS_NAMES
+from PIL import Image
 
 
 @st.cache_data(show_spinner="Loading MNIST dataset...")
 def _load_mnist():
     """Load MNIST once; cache for the session."""
     import tensorflow as tf
-    (X_train, y_train), (X_test, y_test) = tf.keras.datasets.mnist.load_data()
-    return X_train, y_train, X_test, y_test
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+    return x_train, y_train, x_test, y_test
 
 
 def _make_class_grid(images: np.ndarray, labels: np.ndarray, digit: int, n: int = 10) -> Image.Image:

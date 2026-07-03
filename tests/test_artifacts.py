@@ -22,7 +22,7 @@ Tests in this file:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -33,10 +33,8 @@ from src.artifacts import (
     _save_mnist_image,
     _save_raw_metrics,
     _save_roc_data,
-    _save_sample_predictions,
 )
 from src.dataset import MNISTData
-
 
 # ─── Synthetic MNISTData ─────────────────────────────────────────────────────
 
@@ -53,16 +51,16 @@ def tiny_mnist_data() -> MNISTData:
     n_per_class = 20
     n_total = n_per_class * 10
 
-    X = rng.random((n_total, 28, 28, 1), dtype=np.float32).astype(np.float32)
+    x = rng.random((n_total, 28, 28, 1), dtype=np.float32).astype(np.float32)
     y_labels = np.repeat(np.arange(10), n_per_class).astype(np.int32)
     y_onehot = np.eye(10, dtype=np.float32)[y_labels]
 
     return MNISTData(
-        X_train=X,
+        X_train=x,
         y_train=y_onehot,
-        X_val=X[:50],
+        X_val=x[:50],
         y_val=y_onehot[:50],
-        X_test=X,
+        X_test=x,
         y_test=y_onehot,
         y_test_labels=y_labels,
     )
@@ -87,7 +85,7 @@ def fake_predictions(tiny_mnist_data: MNISTData) -> tuple[np.ndarray, np.ndarray
 
     # Build plausible probability vectors
     probs = np.zeros((n, 10), dtype=np.float32)
-    for i, (t, p) in enumerate(zip(true, predicted)):
+    for i, (_t, p) in enumerate(zip(true, predicted, strict=False)):
         probs[i, p] = 0.9
         remaining = np.ones(10) * 0.1 / 9
         remaining[p] = 0
@@ -330,14 +328,14 @@ class TestFindBestExampleForClass:
         """
         # Create a dataset with only class 0 — no class 5 examples
         rng = np.random.default_rng(seed=1)
-        X = rng.random((50, 28, 28, 1)).astype(np.float32)
+        x = rng.random((50, 28, 28, 1)).astype(np.float32)
         y_labels = np.zeros(50, dtype=np.int32)  # all class 0
         y_onehot = np.eye(10)[y_labels].astype(np.float32)
 
         data = MNISTData(
-            X_train=X, y_train=y_onehot,
-            X_val=X[:10], y_val=y_onehot[:10],
-            X_test=X, y_test=y_onehot, y_test_labels=y_labels,
+            X_train=x, y_train=y_onehot,
+            X_val=x[:10], y_val=y_onehot[:10],
+            X_test=x, y_test=y_onehot, y_test_labels=y_labels,
         )
 
         result = _find_best_example_for_class(data, digit_class=5, model=stub_cnn_model)

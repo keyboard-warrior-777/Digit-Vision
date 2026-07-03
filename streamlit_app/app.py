@@ -14,16 +14,15 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import streamlit as st
+import streamlit.components.v1 as components
+from components.styles import get_global_css
+from home_content import render_home_page
+
 # ── Project root on sys.path so 'from src.xxx import yyy' works everywhere ───
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
-
-import streamlit as st
-import streamlit.components.v1 as components
-
-from components.styles import get_global_css
-from home_content import render_home_page
 
 # ── Page configuration ────────────────────────────────────────────────────────
 st.set_page_config(

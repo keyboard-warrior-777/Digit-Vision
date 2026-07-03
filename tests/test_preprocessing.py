@@ -29,7 +29,6 @@ from PIL import Image
 
 from src.preprocessing import canvas_image_to_model_input, uploaded_image_to_model_input
 
-
 # ─── Canvas preprocessing ─────────────────────────────────────────────────────
 
 

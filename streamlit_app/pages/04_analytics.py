@@ -20,17 +20,14 @@ from pathlib import Path
 
 import numpy as np
 import streamlit as st
-
 from components.cards import info_box, page_header, status_badge
 from components.charts import (
-    build_accuracy_comparison_chart,
     build_class_distribution_chart,
     build_confusion_matrix_chart,
     build_f1_bar_chart,
     build_roc_chart,
     build_training_curves_chart,
 )
-from components.styles import get_global_css
 
 from config.config import (
     AVAILABLE_MODELS,
@@ -44,7 +41,6 @@ from config.config import (
     ROC_DATA_PATHS,
     SAMPLE_PREDICTIONS_PATHS,
 )
-
 
 # ── Data loaders (cached to avoid re-reading files on every rerun) ────────────
 
@@ -190,7 +186,7 @@ with tab_curves:
             "<div class='dv-section-header'>Training Summary</div>",
             unsafe_allow_html=True,
         )
-        from components.charts import MODEL_LABELS, MODEL_COLOURS
+        from components.charts import MODEL_LABELS
         summary_rows = ""
         for name, hist in histories.items():
             val_acc = hist.get("val_accuracy", [])
@@ -289,7 +285,7 @@ with tab_cm:
         if wrong:
             with st.expander(f"🔍 Wrong Prediction Explorer — {len(wrong)} samples"):
                 img_cols = st.columns(min(len(wrong), 5))
-                for col, p in zip(img_cols, wrong[:5]):
+                for col, p in zip(img_cols, wrong[:5], strict=False):
                     with col:
                         img_path = Path(p["image_path"])
                         if img_path.exists():
@@ -481,7 +477,7 @@ with tab_compare:
         # ── Ranking cards ────────────────────────────────────────────────────
         best_acc_model = max(compare_data, key=lambda n: compare_data[n]["accuracy"])
         rank_cols = st.columns(len(compare_data))
-        for col, (name, d) in zip(rank_cols, compare_data.items()):
+        for col, (name, d) in zip(rank_cols, compare_data.items(), strict=False):
             is_winner = name == best_acc_model
             border = "3px solid #fbbf24" if is_winner else "1px solid #2d3154"
             badge = "🏆 Best Accuracy" if is_winner else ""
@@ -510,7 +506,10 @@ with tab_compare:
         st.markdown("<div style='margin-top:1.5rem'></div>", unsafe_allow_html=True)
 
         # ── Grouped metric comparison chart ──────────────────────────────────
-        from components.charts import build_grouped_metric_comparison_chart, build_radar_chart
+        from components.charts import (
+            build_grouped_metric_comparison_chart,
+            build_radar_chart,
+        )
         st.plotly_chart(
             build_grouped_metric_comparison_chart(compare_data),
             use_container_width=True,

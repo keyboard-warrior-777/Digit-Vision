@@ -26,13 +26,12 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
+from config.config import CLASS_NAMES
 from src.evaluate import (
     ModelEvaluation,
     _compute_per_class_f1,
     load_training_history,
 )
-from config.config import CLASS_NAMES
-
 
 # ─── load_training_history ────────────────────────────────────────────────────
 
@@ -235,6 +234,8 @@ class TestEvaluateModelErrorHandling:
         """
         from src.evaluate import evaluate_model
 
-        with patch("src.evaluate.MODEL_PATHS", {"dense_nn": tmp_path / "missing.keras"}):
-            with pytest.raises(FileNotFoundError, match="Train it first"):
-                evaluate_model("dense_nn")
+        with (
+            patch("src.evaluate.MODEL_PATHS", {"dense_nn": tmp_path / "missing.keras"}),
+            pytest.raises(FileNotFoundError, match="Train it first"),
+        ):
+            evaluate_model("dense_nn")

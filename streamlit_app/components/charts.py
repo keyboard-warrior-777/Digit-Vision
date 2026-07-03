@@ -13,13 +13,9 @@ Design:
 
 from __future__ import annotations
 
-from typing import Optional
-
 import numpy as np
-import plotly.graph_objects as go
 import plotly.express as px
-from plotly.subplots import make_subplots
-
+import plotly.graph_objects as go
 
 # ─── Shared theme ────────────────────────────────────────────────────────────
 # Applied to every figure via fig.update_layout(**PLOTLY_LAYOUT_DEFAULTS)
@@ -352,7 +348,7 @@ def build_accuracy_comparison_chart(
 
 def build_roc_chart(
     roc_data: dict[str, dict],
-    selected_classes: Optional[list[str]] = None,
+    selected_classes: list[str] | None = None,
 ) -> go.Figure:
     """
     Build a multi-line ROC chart (one line per selected digit class).
@@ -382,7 +378,7 @@ def build_roc_chart(
         )
     )
 
-    for i, digit in enumerate(classes_to_plot):
+    for digit in classes_to_plot:
         if digit not in roc_data:
             continue
         entry = roc_data[digit]

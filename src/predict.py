@@ -170,7 +170,7 @@ def _probabilities_to_result(
 
     all_probabilities = {
         label: float(prob)
-        for label, prob in zip(CLASS_NAMES, probabilities)
+        for label, prob in zip(CLASS_NAMES, probabilities, strict=False)
     }
 
     return PredictionResult(

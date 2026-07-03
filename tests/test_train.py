@@ -32,7 +32,6 @@ import tensorflow as tf
 
 from src.train import TrainingResult, _build_training_callbacks, _save_training_history
 
-
 # ─── TrainingResult dataclass ─────────────────────────────────────────────────
 
 
@@ -273,7 +272,7 @@ class TestSaveTrainingHistory:
         original_val_acc = [float(v) for v in history.history["val_accuracy"]]
         saved_val_acc = content["val_accuracy"]
 
-        for orig, saved in zip(original_val_acc, saved_val_acc):
+        for orig, saved in zip(original_val_acc, saved_val_acc, strict=False):
             assert abs(orig - saved) < 1e-5, (
                 f"Value mismatch: original={orig}, saved={saved}"
             )

@@ -10,14 +10,14 @@ from __future__ import annotations
 
 import time
 
-import numpy as np
 import streamlit as st
+from components.cards import info_box, page_header
+from components.charts import build_confidence_bar_chart
+from components.styles import (
+    get_global_css,  # noqa: F401 — imported for side-effect in app.py
+)
 from PIL import Image
 from streamlit_drawable_canvas import st_canvas
-
-from components.cards import info_box, page_header, status_badge
-from components.charts import build_confidence_bar_chart
-from components.styles import get_global_css  # noqa: F401 — imported for side-effect in app.py
 
 from config.config import (
     AVAILABLE_MODELS,
@@ -114,7 +114,7 @@ if compare_clicked and has_drawing:
     # running predict_from_canvas() a second time for each model.
     comparison_results: dict[str, object] = {}
 
-    for col, model_name in zip(columns, available):
+    for col, model_name in zip(columns, available, strict=False):
         display_name = MODEL_DISPLAY_NAMES[model_name]
 
         with col:

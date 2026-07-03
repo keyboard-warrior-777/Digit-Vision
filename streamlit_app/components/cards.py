@@ -17,10 +17,8 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Optional
-
-
 import base64
+
 
 def page_header(title: str, subtitle: str, icon: str = "", image_path: str = "") -> str:
     """
@@ -42,7 +40,7 @@ def page_header(title: str, subtitle: str, icon: str = "", image_path: str = "")
         icon_html = f"<img src='data:image/png;base64,{b64}' style='height:1.2em; margin-right:0.5rem; vertical-align:middle; border-radius:8px;' alt='Logo'/>"
     elif icon:
         icon_html = f"<span style='margin-right:0.5rem'>{icon}</span>"
-        
+
     return f"""
 <div class="dv-page-header">
     <div class="dv-page-title" style="display:flex; align-items:center;">{icon_html}{title}</div>
@@ -55,8 +53,8 @@ def metric_card(
     label: str,
     value: str,
     icon: str = "",
-    delta: Optional[str] = None,
-    delta_positive: Optional[bool] = None,
+    delta: str | None = None,
+    delta_positive: bool | None = None,
 ) -> str:
     """
     Render a single metric display card with an optional delta indicator.

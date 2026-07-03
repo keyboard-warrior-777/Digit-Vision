@@ -10,9 +10,14 @@ from __future__ import annotations
 import json
 
 import streamlit as st
-
-from components.cards import metric_card, model_comparison_card, page_header, status_badge
+from components.cards import (
+    metric_card,
+    model_comparison_card,
+    page_header,
+    status_badge,
+)
 from components.styles import get_global_css
+
 from config.config import (
     AVAILABLE_MODELS,
     HISTORY_PATHS,
@@ -21,7 +26,6 @@ from config.config import (
     MODEL_PATHS,
     RAW_METRICS_PATHS,
 )
-
 
 # ── Data loading ──────────────────────────────────────────────────────────────
 
@@ -173,7 +177,7 @@ def render_home_page() -> None:
     )
 
     cols = st.columns(3)
-    for col, model_name in zip(cols, AVAILABLE_MODELS):
+    for col, model_name in zip(cols, AVAILABLE_MODELS, strict=False):
         meta = metadata[model_name]
         display_name = MODEL_DISPLAY_NAMES[model_name]
         description = MODEL_DESCRIPTIONS[model_name]

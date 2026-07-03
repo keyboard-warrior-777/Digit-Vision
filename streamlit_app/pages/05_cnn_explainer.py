@@ -10,12 +10,10 @@ from __future__ import annotations
 
 import numpy as np
 import streamlit as st
-from PIL import Image
-from streamlit_drawable_canvas import st_canvas
-
 from components.cards import info_box, page_header, pipeline_step
 from components.charts import build_confidence_bar_chart
-from components.styles import get_global_css
+from PIL import Image
+from streamlit_drawable_canvas import st_canvas
 
 from config.config import CANVAS_SIZE, CANVAS_STROKE_WIDTH, MODEL_PATHS
 from src.gradcam import compute_gradcam, overlay_heatmap_on_image

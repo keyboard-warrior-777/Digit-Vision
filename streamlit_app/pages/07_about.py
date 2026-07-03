@@ -9,11 +9,7 @@ training pipeline, and technology stack.
 from __future__ import annotations
 
 import streamlit as st
-
-from components.cards import info_box, metric_card, page_header, status_badge
-from components.styles import get_global_css
-
-from config.config import AVAILABLE_MODELS, MODEL_DISPLAY_NAMES, MODEL_DESCRIPTIONS
+from components.cards import info_box, page_header
 
 # ─────────────────────────────────────────────────────────────────────────────
 

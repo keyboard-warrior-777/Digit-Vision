@@ -33,17 +33,14 @@ Tests in this file:
 from __future__ import annotations
 
 import numpy as np
-import pytest
 import plotly.graph_objects as go
-
+import pytest
 from components.cards import (
     info_box,
     metric_card,
-    model_comparison_card,
     page_header,
     pipeline_step,
     prediction_result_card,
-    section_header,
     status_badge,
 )
 from components.charts import (
@@ -54,7 +51,6 @@ from components.charts import (
     build_f1_bar_chart,
     build_training_curves_chart,
 )
-
 
 # ─── cards.py tests ───────────────────────────────────────────────────────────
 

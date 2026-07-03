@@ -28,7 +28,6 @@ from __future__ import annotations
 import json
 import time
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import tensorflow as tf
@@ -321,7 +320,7 @@ def _find_best_example_for_class(
     data: MNISTData,
     digit_class: int,
     model: tf.keras.Model,
-) -> Optional[np.ndarray]:
+) -> np.ndarray | None:
     """
     Find the highest-confidence correctly-predicted example for a given digit class.
 

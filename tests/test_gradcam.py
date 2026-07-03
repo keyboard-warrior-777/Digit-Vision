@@ -30,13 +30,10 @@ import pytest
 import tensorflow as tf
 
 from src.gradcam import (
+    _find_last_conv_layer,
     compute_gradcam,
     overlay_heatmap_on_image,
-    _find_last_conv_layer,
-    _compute_heatmap,
-    _build_gradient_model,
 )
-
 
 # ─── compute_gradcam ─────────────────────────────────────────────────────────
 

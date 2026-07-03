@@ -10,16 +10,13 @@ and inference time.
 from __future__ import annotations
 
 import time
-from pathlib import Path
 
 import numpy as np
 import streamlit as st
-from PIL import Image
-from streamlit_drawable_canvas import st_canvas
-
 from components.cards import info_box, page_header, prediction_result_card
 from components.charts import build_confidence_bar_chart
-from components.styles import get_global_css
+from PIL import Image
+from streamlit_drawable_canvas import st_canvas
 
 from config.config import (
     AVAILABLE_MODELS,
@@ -31,7 +28,6 @@ from config.config import (
 from src.gradcam import compute_gradcam, overlay_heatmap_on_image
 from src.predict import predict_from_canvas, predict_from_upload
 from src.preprocessing import uploaded_image_to_model_input
-
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -153,7 +149,7 @@ with tab_draw:
                 key=lambda x: -x[1],
             )[:3]
             top3_cols = st.columns(3)
-            for tcol, (digit, prob) in zip(top3_cols, sorted_probs):
+            for tcol, (digit, prob) in zip(top3_cols, sorted_probs, strict=False):
                 tcol.metric(f"#{sorted_probs.index((digit, prob)) + 1} Digit {digit}", f"{prob:.1%}")
 
             # Grad-CAM — only for CNN models
@@ -261,7 +257,7 @@ with tab_upload:
             key=lambda x: -x[1],
         )[:3]
         top3u_cols = st.columns(3)
-        for tcol, (digit, prob) in zip(top3u_cols, sorted_probs_up):
+        for tcol, (digit, prob) in zip(top3u_cols, sorted_probs_up, strict=False):
             tcol.metric(f"#{sorted_probs_up.index((digit, prob)) + 1} Digit {digit}", f"{prob:.1%}")
 
         # Grad-CAM for CNN models
