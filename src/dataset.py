@@ -97,43 +97,43 @@ def load_and_prepare_mnist() -> MNISTData:
     """
     logger.info("Loading MNIST dataset from tf.keras.datasets...")
 
-    (X_train_raw, y_train_raw), (X_test_raw, y_test_raw) = (
+    (x_train_raw, y_train_raw), (x_test_raw, y_test_raw) = (
         tf.keras.datasets.mnist.load_data()
     )
 
     logger.info(
         "MNIST loaded — %d training samples, %d test samples.",
-        len(X_train_raw),
-        len(X_test_raw),
+        len(x_train_raw),
+        len(x_test_raw),
     )
 
-    X_train_processed = _normalize_and_reshape(X_train_raw)
-    X_test_processed = _normalize_and_reshape(X_test_raw)
+    x_train_processed = _normalize_and_reshape(x_train_raw)
+    x_test_processed = _normalize_and_reshape(x_test_raw)
 
-    X_train_split, X_val_split, y_train_split, y_val_split = _split_validation(
-        X_train_processed, y_train_raw
+    x_train_split, x_val_split, y_train_split, y_val_split = _split_validation(
+        x_train_processed, y_train_raw
     )
 
     logger.info(
         "Dataset ready — Train: %d | Val: %d | Test: %d",
-        len(X_train_split),
-        len(X_val_split),
-        len(X_test_processed),
+        len(x_train_split),
+        len(x_val_split),
+        len(x_test_processed),
     )
 
     return MNISTData(
-        X_train=X_train_split,
+        X_train=x_train_split,
         y_train=_one_hot_encode(y_train_split),
-        X_val=X_val_split,
+        X_val=x_val_split,
         y_val=_one_hot_encode(y_val_split),
-        X_test=X_test_processed,
+        X_test=x_test_processed,
         y_test=_one_hot_encode(y_test_raw),
         y_test_labels=y_test_raw,
     )
 
 
 def create_augmented_generator(
-    X: np.ndarray,
+    x: np.ndarray,
     y: np.ndarray,
     batch_size: int,
 ) -> tf.keras.preprocessing.image.NumpyArrayIterator:
@@ -157,7 +157,7 @@ def create_augmented_generator(
         - Height shift:  handles off-centre drawing (vertical)
 
     Args:
-        X: Training images, shape (N, 28, 28, 1), normalized float32.
+        x: Training images, shape (N, 28, 28, 1), normalized float32.
         y: One-hot encoded labels, shape (N, 10).
         batch_size: Number of samples per batch.
 
@@ -167,9 +167,9 @@ def create_augmented_generator(
     generator = tf.keras.preprocessing.image.ImageDataGenerator(
         **AUGMENTATION_CONFIG
     )
-    generator.fit(X, seed=RANDOM_SEED)
+    generator.fit(x, seed=RANDOM_SEED)
 
-    return generator.flow(X, y, batch_size=batch_size, seed=RANDOM_SEED)
+    return generator.flow(x, y, batch_size=batch_size, seed=RANDOM_SEED)
 
 
 # ─── Private helpers ───────────────────────────────────────────────────────────
@@ -189,7 +189,7 @@ def _normalize_and_reshape(images: np.ndarray) -> np.ndarray:
 
 
 def _split_validation(
-    X: np.ndarray,
+    x: np.ndarray,
     y: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -203,14 +203,14 @@ def _split_validation(
         (X_train, X_val, y_train, y_val)
     """
     rng = np.random.default_rng(seed=RANDOM_SEED)
-    n_total = len(X)
+    n_total = len(x)
     n_val = int(n_total * VALIDATION_SPLIT)
 
     shuffled_indices = rng.permutation(n_total)
     val_indices = shuffled_indices[:n_val]
     train_indices = shuffled_indices[n_val:]
 
-    return X[train_indices], X[val_indices], y[train_indices], y[val_indices]
+    return x[train_indices], x[val_indices], y[train_indices], y[val_indices]
 
 
 def _one_hot_encode(labels: np.ndarray) -> np.ndarray:
