@@ -365,18 +365,7 @@ print(f"All probabilities: {result.all_probabilities}")
 |--------------------|--------------|-----------------|
 | ![Analytics](assets/screenshots/analytics.png) | ![CNN Explainer](assets/screenshots/cnn_explainer.png) | ![Dataset](assets/screenshots/dataset.png) |
 
----
 
-## Demo
-
-> *Add a screen recording GIF here after running the app.*
-
-```
-[Demo GIF — Record with: streamlit run streamlit_app/app.py, then screen-record
- the Draw page, Playground, and CNN Explainer]
-```
-
----
 
 ## Testing
 
