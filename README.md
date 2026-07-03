@@ -55,46 +55,7 @@ The three models are not just trained — they are compared, visualised, and exp
 - **LeNet-5** shows *how* convolution changed everything in 1998
 - **Custom CNN** shows *what* modern best practices (BatchNorm, GAP, Dropout) achieve
 
----
 
-## Screenshots
-
-<details>
-<summary><strong>📸 Click to expand screenshots of the live application</strong></summary>
-
-<br>
-
-![Home Dashboard](assets/screenshots/home.png)
-*The main dashboard tracking all trained models and their parameter efficiency.*
-
-<br>
-
-![Analytics Dashboard](assets/screenshots/analytics.png)
-*Interactive analytics including training curves, per-class F1, and confusion matrices.*
-
-<br>
-
-![Playground](assets/screenshots/playground.png)
-*The Model Playground allows you to draw once and run inference across all three architectures simultaneously.*
-
-<br>
-
-![CNN Explainer](assets/screenshots/cnn_explainer.png)
-*Grad-CAM heatmaps explain exactly which pixels drove the Custom CNN's prediction.*
-
-<br>
-
-![Recognize Page](assets/screenshots/recognize.png)
-*Real-time digit recognition with confidence charts and sub-second inference.*
-
-<br>
-
-![Dataset Explorer](assets/screenshots/dataset.png)
-*Visualise the MNIST dataset class distributions, sample images, and augmentation techniques.*
-
-</details>
-
----
 
 ## Key Features
 
@@ -396,15 +357,13 @@ print(f"All probabilities: {result.all_probabilities}")
 
 ## Screenshots
 
-> *Train the models and launch the app to see the live dashboard. Screenshots will be added here after training.*
-
 | Home Page | Draw & Predict | Model Playground |
 |-----------|---------------|-----------------|
-| `[screenshot]` | `[screenshot]` | `[screenshot]` |
+| ![Home](assets/screenshots/home.png) | ![Recognize](assets/screenshots/recognize.png) | ![Playground](assets/screenshots/playground.png) |
 
 | Analytics Dashboard | CNN Explainer | Dataset Explorer |
 |--------------------|--------------|-----------------|
-| `[screenshot]` | `[screenshot]` | `[screenshot]` |
+| ![Analytics](assets/screenshots/analytics.png) | ![CNN Explainer](assets/screenshots/cnn_explainer.png) | ![Dataset](assets/screenshots/dataset.png) |
 
 ---
 
