@@ -20,22 +20,32 @@ from __future__ import annotations
 from typing import Optional
 
 
-def page_header(title: str, subtitle: str, icon: str = "") -> str:
+import base64
+
+def page_header(title: str, subtitle: str, icon: str = "", image_path: str = "") -> str:
     """
     Render the standard DigitVision page header with gradient title.
 
     Args:
-        title:    Main page title.
-        subtitle: Descriptive subtitle shown below the title.
-        icon:     Optional emoji displayed before the title.
+        title:      Main page title.
+        subtitle:   Descriptive subtitle shown below the title.
+        icon:       Optional emoji displayed before the title.
+        image_path: Optional path to an image to use as the icon.
 
     Returns:
         HTML string for ``st.markdown(unsafe_allow_html=True)``.
     """
-    icon_html = f"<span style='margin-right:0.5rem'>{icon}</span>" if icon else ""
+    icon_html = ""
+    if image_path:
+        with open(image_path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode("utf-8")
+        icon_html = f"<img src='data:image/png;base64,{b64}' style='height:1.2em; margin-right:0.5rem; vertical-align:middle; border-radius:8px;' alt='Logo'/>"
+    elif icon:
+        icon_html = f"<span style='margin-right:0.5rem'>{icon}</span>"
+        
     return f"""
 <div class="dv-page-header">
-    <div class="dv-page-title">{icon_html}{title}</div>
+    <div class="dv-page-title" style="display:flex; align-items:center;">{icon_html}{title}</div>
     <div class="dv-page-subtitle">{subtitle}</div>
 </div>
 """

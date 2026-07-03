@@ -92,7 +92,7 @@ def render_home_page() -> None:
         page_header(
             "DigitVision",
             "Three architectures, one benchmark — Dense NN → LeNet-5 → Custom CNN",
-            "🔢",
+            image_path="assets/logo.png",
         ),
         unsafe_allow_html=True,
     )
