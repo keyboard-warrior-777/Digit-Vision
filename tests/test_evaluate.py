@@ -21,7 +21,7 @@ Tests in this file:
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -358,7 +358,7 @@ class TestEvaluateModelErrorHandling:
             patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path),
             patch("src.evaluate.load_training_history", return_value=history),
         ):
-            path = _save_training_curves_plot(["modelA", "modelB"])
+            _save_training_curves_plot(["modelA", "modelB"])
             # _save_training_curves_plot returns None
             assert (tmp_path / "training_curves.png").exists()
 
@@ -369,6 +369,6 @@ class TestEvaluateModelErrorHandling:
             patch("src.evaluate.PERFORMANCE_PLOTS_DIR", tmp_path),
             patch("src.evaluate.load_training_history", return_value=None),
         ):
-            path = _save_training_curves_plot(["modelA"])
+            _save_training_curves_plot(["modelA"])
             # The file is still created even if there is no history (as an empty plot)
             assert (tmp_path / "training_curves.png").exists()
