@@ -252,9 +252,7 @@ def _format_per_class_f1_table(f1_scores: dict[str, float]) -> str:
         grade = (
             "🟢 Excellent"
             if score >= 0.99
-            else "🟡 Good"
-            if score >= 0.97
-            else "🔴 Needs work"
+            else "🟡 Good" if score >= 0.97 else "🔴 Needs work"
         )
         rows.append(f"| {digit}     | {score:.4f}   | {grade} |")
     return "\n".join(rows)
