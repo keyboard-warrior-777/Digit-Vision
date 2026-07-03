@@ -87,6 +87,11 @@ The three models are not just trained — they are compared, visualised, and exp
 ![Recognize Page](assets/screenshots/recognize.png)
 *Real-time digit recognition with confidence charts and sub-second inference.*
 
+<br>
+
+![Dataset Explorer](assets/screenshots/dataset.png)
+*Visualise the MNIST dataset class distributions, sample images, and augmentation techniques.*
+
 </details>
 
 ---
