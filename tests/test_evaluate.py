@@ -65,9 +65,9 @@ class TestLoadTrainingHistory:
 
         for key, values in history.items():
             assert isinstance(values, list), f"'{key}' should be a list"
-            assert all(isinstance(v, float) for v in values), (
-                f"All values in '{key}' should be float"
-            )
+            assert all(
+                isinstance(v, float) for v in values
+            ), f"All values in '{key}' should be float"
 
     def test_returns_none_for_missing_model(self) -> None:
         """
@@ -105,9 +105,9 @@ class TestLoadTrainingHistory:
 
         lengths = {key: len(vals) for key, vals in history.items()}
         unique_lengths = set(lengths.values())
-        assert len(unique_lengths) == 1, (
-            f"All history lists should have same length: {lengths}"
-        )
+        assert (
+            len(unique_lengths) == 1
+        ), f"All history lists should have same length: {lengths}"
 
 
 # ─── _compute_per_class_f1 ────────────────────────────────────────────────────
@@ -154,9 +154,9 @@ class TestComputePerClassF1:
         pred = true.copy()
         result = _compute_per_class_f1(true, pred)
         for digit, score in result.items():
-            assert abs(score - 1.0) < 1e-6, (
-                f"Perfect predictions should give F1=1.0 for digit {digit}, got {score}"
-            )
+            assert (
+                abs(score - 1.0) < 1e-6
+            ), f"Perfect predictions should give F1=1.0 for digit {digit}, got {score}"
 
     def test_all_wrong_predictions_give_f1_zero(self) -> None:
         """
@@ -186,9 +186,9 @@ class TestComputePerClassF1:
         pred = true.copy()
         result = _compute_per_class_f1(true, pred)
         for digit, score in result.items():
-            assert isinstance(score, float), (
-                f"F1 score for '{digit}' should be Python float, got {type(score).__name__}"
-            )
+            assert isinstance(
+                score, float
+            ), f"F1 score for '{digit}' should be Python float, got {type(score).__name__}"
 
 
 # ─── ModelEvaluation dataclass ────────────────────────────────────────────────
