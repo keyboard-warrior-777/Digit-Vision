@@ -28,7 +28,7 @@ from home_content import render_home_page
 # ── Page configuration ────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="DigitVision",
-    page_icon="🔢",
+    page_icon="assets/logo.png",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -37,6 +37,9 @@ st.set_page_config(
         "About": "DigitVision — Handwritten Digit Recognition with Deep Learning",
     },
 )
+
+# Set the logo for the sidebar (requires Streamlit >= 1.35)
+st.logo("assets/logo.png")
 
 # ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown(get_global_css(), unsafe_allow_html=True)
