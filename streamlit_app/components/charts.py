@@ -465,3 +465,123 @@ def build_class_distribution_chart(
     )
 
     return fig
+
+
+# ─── Grouped metric comparison (Model Comparison tab) ─────────────────────────
+
+def build_grouped_metric_comparison_chart(
+    compare_data: dict[str, dict],
+) -> go.Figure:
+    """
+    Build a grouped bar chart comparing Accuracy, Macro F1, Precision and Recall
+    across all models simultaneously.
+
+    Args:
+        compare_data: Dict mapping model_name → metric dict with keys
+                      'accuracy', 'macro_f1', 'precision', 'recall'.
+
+    Returns:
+        Plotly Figure.
+    """
+    metrics = [
+        ("accuracy",  "Accuracy"),
+        ("macro_f1",  "Macro F1"),
+        ("precision", "Macro Precision"),
+        ("recall",    "Macro Recall"),
+    ]
+
+    fig = go.Figure()
+
+    for model_name, d in compare_data.items():
+        colour = MODEL_COLOURS.get(model_name, "#94a3b8")
+        label  = MODEL_LABELS.get(model_name, model_name)
+        fig.add_trace(
+            go.Bar(
+                name=label,
+                x=[m_label for _, m_label in metrics],
+                y=[d.get(m_key, 0) for m_key, _ in metrics],
+                marker_color=colour,
+                marker_line_width=0,
+                text=[f"{d.get(m_key, 0):.3f}" for m_key, _ in metrics],
+                textposition="outside",
+                textfont={"size": 11},
+                hovertemplate=f"{label} — %{{x}}: %{{y:.4f}}<extra></extra>",
+            )
+        )
+
+    fig.update_layout(
+        **PLOTLY_LAYOUT_DEFAULTS,
+        title={"text": "Metric Comparison — All Models", "font": {"size": 14}},
+        barmode="group",
+        xaxis=AXIS_STYLE,
+        yaxis={"range": [0.97, 1.005], "tickformat": ".2%", **AXIS_STYLE},
+        height=400,
+    )
+
+    return fig
+
+
+# ─── Radar chart (Model Comparison tab) ──────────────────────────────────────
+
+def build_radar_chart(
+    compare_data: dict[str, dict],
+) -> go.Figure:
+    """
+    Build a radar / spider chart visualising five model metrics simultaneously.
+
+    Each axis runs from 0 to 1. The chart makes architectural trade-offs
+    immediately visible (e.g. one model may have higher recall but lower
+    precision).
+
+    Args:
+        compare_data: Dict mapping model_name → metric dict.
+
+    Returns:
+        Plotly Figure.
+    """
+    dimensions = ["accuracy", "macro_f1", "precision", "recall", "weighted_f1"]
+    dim_labels = ["Accuracy", "Macro F1", "Precision", "Recall", "Weighted F1"]
+
+    fig = go.Figure()
+
+    for model_name, d in compare_data.items():
+        colour = MODEL_COLOURS.get(model_name, "#94a3b8")
+        label  = MODEL_LABELS.get(model_name, model_name)
+        values = [d.get(k, 0) for k in dimensions]
+        # Close the polygon
+        values_closed = values + [values[0]]
+        labels_closed = dim_labels + [dim_labels[0]]
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=values_closed,
+                theta=labels_closed,
+                name=label,
+                line={"color": colour, "width": 2.5},
+                fill="toself",
+                fillcolor=f"rgba({int(colour[1:3],16)},{int(colour[3:5],16)},{int(colour[5:7],16)},0.12)",
+                hovertemplate=f"{label}<br>%{{theta}}: %{{r:.4f}}<extra></extra>",
+            )
+        )
+
+    fig.update_layout(
+        **PLOTLY_LAYOUT_DEFAULTS,
+        title={"text": "Architecture Performance Radar", "font": {"size": 14}},
+        polar={
+            "bgcolor": "#1a1d2e",
+            "radialaxis": {
+                "visible": True,
+                "range": [0.97, 1.0],
+                "tickformat": ".2%",
+                "gridcolor": "#2d3154",
+                "linecolor": "#2d3154",
+            },
+            "angularaxis": {
+                "gridcolor": "#2d3154",
+                "linecolor": "#2d3154",
+            },
+        },
+        height=420,
+    )
+
+    return fig

@@ -46,7 +46,7 @@ def _models_available() -> list[str]:
 st.markdown(
     page_header(
         "Model Playground",
-        "Draw once · See all three models predict simultaneously",
+        "One drawing, three predictions — compare architectures side by side",
         "🔬",
     ),
     unsafe_allow_html=True,
@@ -69,12 +69,15 @@ if len(available) < 3:
     )
 
 # ── Canvas ────────────────────────────────────────────────────────────────────
-st.markdown(
-    info_box(
-        "Draw a digit in the canvas below and click <strong>Compare All Models</strong>. "
-        "Each model predicts independently using the same drawing."
-    ),
-    unsafe_allow_html=True,
+
+# Brush size slider lives here so it renders before the canvas
+brush_size = st.sidebar.slider(
+    "Brush size",
+    min_value=10,
+    max_value=40,
+    value=CANVAS_STROKE_WIDTH,
+    step=2,
+    help="Adjust the stroke width for drawing.",
 )
 
 col_canvas, col_spacer = st.columns([1, 2])
@@ -82,7 +85,7 @@ with col_canvas:
     st.markdown("**Draw a digit:**")
     canvas_result = st_canvas(
         fill_color="rgba(0, 0, 0, 0)",
-        stroke_width=CANVAS_STROKE_WIDTH,
+        stroke_width=brush_size,
         stroke_color="#FFFFFF",
         background_color="#000000",
         height=CANVAS_SIZE,
@@ -94,12 +97,12 @@ with col_canvas:
         "⚡  Compare All Models", type="primary", use_container_width=True
     )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
 # ── Comparison results ────────────────────────────────────────────────────────
 has_drawing = (
     canvas_result.image_data is not None
-    and canvas_result.image_data.sum() > 0
+    and canvas_result.image_data[:, :, :3].sum() > 0
 )
 
 if compare_clicked and has_drawing:
@@ -158,7 +161,7 @@ if compare_clicked and has_drawing:
                 unsafe_allow_html=True,
             )
 
-            st.markdown("<div style='margin-top:0.75rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:var(--sp-2)'></div>", unsafe_allow_html=True)
 
             # Confidence chart
             st.plotly_chart(
@@ -176,7 +179,7 @@ if compare_clicked and has_drawing:
                     st.image(
                         Image.fromarray(overlay).resize((140, 140), Image.NEAREST),
                         caption="Grad-CAM",
-                        use_container_width=False,
+                        width=140,
                     )
             else:
                 st.markdown(
@@ -186,7 +189,7 @@ if compare_clicked and has_drawing:
                 )
 
     # ── Quick comparison summary table ─────────────────────────────────────
-    st.markdown("<div style='margin-top:2rem'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:var(--sp-4)'></div>", unsafe_allow_html=True)
     st.markdown(
         "<div class='dv-section-header'>Comparison Summary</div>",
         unsafe_allow_html=True,
@@ -223,12 +226,11 @@ elif compare_clicked and not has_drawing:
 else:
     st.markdown(
         """
-        <div style='text-align:center;color:#64748b;padding:3rem 0'>
-            <div style='font-size:2.5rem;margin-bottom:0.75rem'>🔬</div>
-            <div style='font-size:1rem;color:#94a3b8;font-weight:500'>
+        <div style='text-align:center;color:#7c8aaa;padding:3rem 0'>
+            <div style='font-size:0.95rem;font-weight:500;color:#94a3b8'>
                 Draw a digit above and click Compare All Models
             </div>
-            <div style='font-size:0.85rem;margin-top:0.35rem'>
+            <div style='font-size:0.82rem;margin-top:0.4rem'>
                 All three architectures will predict simultaneously
             </div>
         </div>

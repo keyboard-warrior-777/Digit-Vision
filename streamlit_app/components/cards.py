@@ -5,12 +5,14 @@ Each function returns an HTML string rendered via st.markdown(unsafe_allow_html=
 Keeping component HTML here prevents inline HTML from cluttering page logic,
 and ensures consistent styling across all pages.
 
+Design tokens are defined in components/styles.py and reused via CSS classes here.
+
 Usage:
     import streamlit as st
-    from streamlit_app.components.cards import page_header, metric_card
+    from components.cards import page_header, metric_card
 
     st.markdown(page_header("Analytics", "Evaluation metrics and charts", "📊"),
-                unsafe_allow_html=True)  # noqa: ERA001
+                unsafe_allow_html=True)
 """
 
 from __future__ import annotations
@@ -133,6 +135,12 @@ def model_comparison_card(
 
     Returns:
         HTML string.
+
+    Note:
+        The divider between the header and stats is rendered as a CSS-styled
+        <div> rather than a bare <hr> tag.  Bare <hr> tags inside complex HTML
+        strings can be re-escaped by some Markdown renderers, causing the tag
+        to appear as literal text.  A <div> with border-top is immune to this.
     """
     best_class = " best-model" if is_best else ""
     badge_html = (
@@ -142,15 +150,19 @@ def model_comparison_card(
     )
     stats_html = "".join(model_stat_row(label, value) for label, value in stats)
 
-    return f"""
-<div class="dv-model-card{best_class}">
-    <div class="dv-model-card-title">{title}</div>
-    <div class="dv-model-card-subtitle">{subtitle}</div>
-    {badge_html}
-    <hr style="border-color:#2d3154;margin:1rem 0">
-    {stats_html}
-</div>
-"""
+    # Build as adjacent f-strings — no blank lines in the output HTML.
+    # Triple-quoted f-strings with an empty {badge_html} insert a blank line,
+    # which causes Python-Markdown to exit HTML-block mode and render the
+    # subsequent <div> as escaped text rather than HTML.
+    return (
+        f'<div class="dv-model-card{best_class}">'
+        f'<div class="dv-model-card-title">{title}</div>'
+        f'<div class="dv-model-card-subtitle">{subtitle}</div>'
+        f'{badge_html}'
+        f'<div class="dv-model-card-divider"></div>'
+        f'{stats_html}'
+        f'</div>'
+    )
 
 
 def prediction_result_card(
@@ -180,27 +192,27 @@ def prediction_result_card(
     return f"""
 <div class="dv-prediction-result">
     <div class="dv-predicted-digit">{predicted_digit}</div>
-    <div style="font-size:0.85rem;color:#64748b;margin-bottom:0.75rem">Predicted Digit</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Predicted Digit</div>
     <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap">
         <div style="text-align:center">
             <div style="font-size:1.75rem;font-weight:800;color:{confidence_colour}">
                 {confidence:.1%}
             </div>
-            <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">
                 Confidence
             </div>
         </div>
         <div style="text-align:center">
-            <div style="font-size:1.75rem;font-weight:800;color:#94a3b8">
+            <div style="font-size:1.75rem;font-weight:800;color:var(--text-secondary)">
                 {inference_ms:.1f}ms
             </div>
-            <div style="font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em">
                 Inference
             </div>
         </div>
     </div>
-    <div style="margin-top:1rem;font-size:0.8rem;color:#64748b">
-        Model: <span style="color:#94a3b8;font-weight:600">{model_name}</span>
+    <div style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted)">
+        Model: <span style="color:var(--text-secondary);font-weight:600">{model_name}</span>
     </div>
 </div>
 """

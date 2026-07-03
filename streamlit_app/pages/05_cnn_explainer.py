@@ -1,20 +1,9 @@
 """
 How CNN Thinks — DigitVision.
 
-An educational, step-by-step visual walkthrough of how a convolutional
-neural network processes a handwritten digit image.
-
-Pipeline visualised:
-    Step 1 — Raw canvas input (or uploaded image)
-    Step 2 — Preprocessed: 28×28, white-on-black, normalised
-    Step 3 — Conv Block 1 feature maps (first 8 shown)
-    Step 4 — After MaxPooling (spatial downsampling)
-    Step 5 — Conv Block 2 feature maps (first 8 shown)
-    Step 6 — Grad-CAM heatmap (attention overlay)
-    Step 7 — Final prediction with probability
-
-This page is designed to help you explain CNNs confidently in interviews.
-Each step includes a plain-language explanation of what is happening and why.
+A step-by-step visual walkthrough of how a convolutional network processes
+a handwritten digit: raw input, preprocessing, feature maps (Conv Block 1 and 2),
+MaxPooling, Grad-CAM, and final prediction with probability breakdown.
 """
 
 from __future__ import annotations
@@ -70,7 +59,7 @@ def _render_feature_maps_grid(feature_maps: np.ndarray, max_maps: int = 8) -> No
             fm_norm = np.zeros_like(fm, dtype=np.uint8)
         pil_fm = Image.fromarray(fm_norm, "L").resize((80, 80), Image.NEAREST)
         with col:
-            st.image(pil_fm, caption=f"Filter {i + 1}", use_container_width=False, width=80)
+            st.image(pil_fm, caption=f"Filter {i + 1}", width=80)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -78,7 +67,7 @@ def _render_feature_maps_grid(feature_maps: np.ndarray, max_maps: int = 8) -> No
 st.markdown(
     page_header(
         "How CNN Thinks",
-        "A visual walkthrough of convolutional feature extraction, pooling, and attention",
+        "From raw pixels to a prediction — each step of the convolutional pipeline visualised",
         "🧠",
     ),
     unsafe_allow_html=True,
@@ -96,10 +85,9 @@ if not cnn_available:
 # ── Introduction callout ──────────────────────────────────────────────────────
 st.markdown(
     info_box(
-        "<strong>Interview-ready explanation:</strong> A convolutional network processes images "
-        "in stages. Early layers detect simple features (edges, curves). Later layers combine "
-        "these into complex patterns (loops, strokes). Grad-CAM shows <em>which pixels</em> "
-        "the network found most informative for its final decision."
+        "A convolutional network processes images in stages. Early layers detect simple features "
+        "(edges, curves). Later layers combine these into complex patterns (loops, strokes). "
+        "Grad-CAM reveals <em>which pixels</em> drove the final classification decision."
     ),
     unsafe_allow_html=True,
 )
@@ -124,7 +112,7 @@ with col_input:
 # ── Processing pipeline ───────────────────────────────────────────────────────
 has_drawing = (
     canvas_result.image_data is not None
-    and canvas_result.image_data.sum() > 0
+    and canvas_result.image_data[:, :, :3].sum() > 0
 )
 
 if analyse_clicked and has_drawing:
@@ -142,12 +130,13 @@ if analyse_clicked and has_drawing:
         pipeline_step(
             1,
             "Raw Canvas Input",
-            "A 280×280 RGBA image from the drawing canvas. "
-            "Black background, white stroke — the opposite of MNIST format.",
+            "A 280×280 RGBA image captured from the drawing canvas. "
+            "White stroke on a black background — already in MNIST polarity.",
         ),
         unsafe_allow_html=True,
     )
-    raw_display = (canvas_result.image_data[:, :, 3]).astype(np.uint8)  # alpha channel
+    import cv2
+    raw_display = cv2.cvtColor(canvas_result.image_data[:, :, :3], cv2.COLOR_RGB2GRAY)
     st.image(Image.fromarray(raw_display, "L").resize((140, 140), Image.NEAREST), width=140)
 
     st.markdown("<div style='color:#64748b;text-align:center;font-size:0.8rem;margin:0.5rem 0'>↓</div>", unsafe_allow_html=True)
@@ -156,9 +145,10 @@ if analyse_clicked and has_drawing:
     st.markdown(
         pipeline_step(
             2,
-            "Preprocessed: 28×28, Inverted, Normalised",
-            "Alpha channel extracted → colours inverted (now white-on-black, matching MNIST) "
-            "→ resized to 28×28 with INTER_AREA interpolation → normalised to [0, 1].",
+            "Preprocessed: 28×28, Normalised",
+            "RGB channels converted to grayscale (white stroke = 255, black BG = 0) "
+            "→ resized to 28×28 with INTER_AREA interpolation → normalised to [0, 1]. "
+            "No inversion needed — the canvas stroke polarity already matches MNIST.",
         ),
         unsafe_allow_html=True,
     )
@@ -166,9 +156,9 @@ if analyse_clicked and has_drawing:
     st.image(Image.fromarray(preprocessed_display, "L").resize((140, 140), Image.NEAREST), width=140)
     st.markdown(
         info_box(
-            "The inversion step is the most commonly missed detail in digit recognition demos. "
-            "The model was trained on white-on-black digits (MNIST). Feeding it black-on-white "
-            "would cause random predictions."
+            "The canvas uses a black background with a white stroke — identical polarity to MNIST "
+            "(bright digit on dark background). The preprocessing converts RGB to grayscale and "
+            "resizes; no colour inversion is required."
         ),
         unsafe_allow_html=True,
     )
@@ -298,12 +288,11 @@ else:
     # Placeholder instruction
     st.markdown(
         """
-        <div style='text-align:center;color:#64748b;padding:4rem 0'>
-            <div style='font-size:2.5rem;margin-bottom:0.75rem'>🧠</div>
-            <div style='font-size:1rem;color:#94a3b8;font-weight:500'>
-                Draw a digit in the canvas above, then click Analyse
+        <div style='text-align:center;color:#7c8aaa;padding:4rem 0'>
+            <div style='font-size:0.95rem;font-weight:500;color:#94a3b8'>
+                Draw a digit above, then click Analyse
             </div>
-            <div style='font-size:0.85rem;margin-top:0.35rem'>
+            <div style='font-size:0.82rem;margin-top:0.4rem'>
                 The full processing pipeline will be visualised step by step
             </div>
         </div>
@@ -311,9 +300,47 @@ else:
         unsafe_allow_html=True,
     )
 
-# ── Interview cheatsheet ──────────────────────────────────────────────────────
+# ── Interview cheatsheet + architecture reference ─────────────────────────────
 with st.sidebar:
-    st.markdown("### 📖 Interview Answers")
+    with st.expander("▼ Model Architecture", expanded=False):
+        if cnn_available:
+            model_for_summary = _load_custom_cnn()
+            # Layer reference table
+            rows_html = ""
+            for layer in model_for_summary.layers:
+                try:
+                    shape_str = str(layer.output_shape)
+                except AttributeError:
+                    shape_str = "N/A"
+                rows_html += (
+                    f"<tr>"
+                    f"<td style='font-size:0.75rem'>{layer.name}</td>"
+                    f"<td style='font-size:0.75rem'>{type(layer).__name__}</td>"
+                    f"<td style='font-size:0.72rem;color:#94a3b8'>{shape_str}</td>"
+                    f"</tr>"
+                )
+            st.markdown(
+                f"""
+                <table class='dv-table'>
+                    <thead><tr>
+                        <th>Layer</th><th>Type</th><th>Output Shape</th>
+                    </tr></thead>
+                    <tbody>{rows_html}</tbody>
+                </table>
+                """,
+                unsafe_allow_html=True,
+            )
+            # Full model summary — shown inline (nested expanders not allowed in Streamlit 1.35)
+            import io
+            summary_buf = io.StringIO()
+            model_for_summary.summary(print_fn=lambda x: summary_buf.write(x + "\n"))
+            st.markdown(
+                "<div style='font-size:0.75rem;color:#94a3b8;margin-top:0.75rem;margin-bottom:0.25rem'>model.summary()</div>",
+                unsafe_allow_html=True,
+            )
+            st.code(summary_buf.getvalue(), language="text")
+
+    st.markdown("### Quick Reference")
     with st.expander("What is a conv filter?"):
         st.markdown(
             "A small matrix (3×3 here) of learned weights that slides across the "

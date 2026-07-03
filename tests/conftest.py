@@ -96,15 +96,24 @@ def valid_canvas_rgba() -> np.ndarray:
     """
     Return a valid 280x280 RGBA canvas image with a white stroke.
 
-    Mimics the exact output of streamlit-drawable-canvas: RGBA uint8,
-    black background (transparent), white foreground stroke.
+    Mimics the exact output of streamlit-drawable-canvas when configured
+    with background_color="#000000" and stroke_color="#FFFFFF":
+    - Background pixels: opaque black (R=0, G=0, B=0, A=255)
+    - Stroke pixels:     opaque white (R=255, G=255, B=255, A=255)
+
+    The alpha channel is 255 for ALL pixels (both background and stroke)
+    because the canvas background is opaque, not transparent.
 
     Prevents:
-        Bugs in the RGBA -> grayscale -> inversion pipeline going undetected.
+        Bugs in the RGB -> grayscale -> resize pipeline going undetected.
     """
     canvas = np.zeros((280, 280, 4), dtype=np.uint8)
-    # Draw a simple vertical stroke in the centre
-    canvas[80:200, 135:145, 3] = 255  # alpha = fully opaque stroke
+    # All pixels are opaque (alpha=255) — canvas background is solid black
+    canvas[:, :, 3] = 255
+    # Draw a simple vertical white stroke in the centre
+    canvas[80:200, 135:145, 0] = 255  # R = white
+    canvas[80:200, 135:145, 1] = 255  # G = white
+    canvas[80:200, 135:145, 2] = 255  # B = white
     return canvas
 
 

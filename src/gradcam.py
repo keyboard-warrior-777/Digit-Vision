@@ -158,7 +158,28 @@ def _build_gradient_model(
     We need simultaneous access to the conv layer's activations and the
     model's predictions to compute the gradient of the prediction with
     respect to the activations — which is exactly what tf.GradientTape needs.
+
+    In Keras 3, a loaded Sequential model loses the differentiable graph
+    connections between intermediate layers if extracted via the standard
+    Functional constructor. Therefore, if the model is Sequential, we
+    explicitly reconstruct a transparent Functional graph.
     """
+    if isinstance(model, tf.keras.Sequential):
+        # Explicitly trace the layers to ensure the gradient path is unbroken
+        x = tf.keras.layers.Input(shape=model.input_shape[1:])
+        inputs = x
+        conv_output = None
+        for layer in model.layers:
+            x = layer(x)
+            if layer.name == conv_layer.name:
+                conv_output = x
+        return tf.keras.Model(
+            inputs=inputs,
+            outputs=[conv_output, x],
+            name="grad_cam_gradient_model",
+        )
+
+    # For Functional models (like custom_cnn), the standard extraction works perfectly
     return tf.keras.Model(
         inputs=model.inputs,
         outputs=[conv_layer.output, model.output],

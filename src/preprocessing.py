@@ -47,12 +47,27 @@ def canvas_image_to_model_input(canvas_image_data: np.ndarray) -> np.ndarray:
 
     Pipeline:
         1. Validate input shape (must be RGBA, i.e., 4 channels)
-        2. Extract the alpha channel — this represents the drawing
-           cleanly, independent of stroke colour
-        3. Invert colours: canvas is black-on-white, MNIST is white-on-black
-        4. Resize to 28×28 using area interpolation (best for downscaling)
-        5. Normalize to [0.0, 1.0]
-        6. Reshape to (1, 28, 28, 1) — batch size 1, single channel
+        2. Convert RGB channels to grayscale — this correctly captures
+           the white stroke on the black background that st_canvas produces
+           when background_color="#000000" is set.
+        3. Resize to 28x28 using area interpolation (best for downscaling)
+        4. Normalize to [0.0, 1.0]
+        5. Reshape to (1, 28, 28, 1) — batch size 1, single channel
+
+    Why NOT the alpha channel:
+        When st_canvas is configured with background_color="#000000", the
+        background pixels are rendered as opaque black (R=0, G=0, B=0,
+        A=255). The stroke pixels are opaque white (R=255, G=255, B=255,
+        A=255). Both background AND stroke have alpha=255, so extracting
+        the alpha channel returns a flat all-255 array. After inversion
+        (255 - 255 = 0), the model receives an all-zero tensor and always
+        predicts the same digit regardless of what the user draws.
+
+    Why RGB grayscale works:
+        Background: RGB=(0,0,0)       -> grayscale=0   -> normalized=0.0
+        Stroke:     RGB=(255,255,255) -> grayscale=255 -> normalized=1.0
+        This is exactly the MNIST distribution: white digit on black
+        background. No inversion is required.
 
     Args:
         canvas_image_data: RGBA numpy array from streamlit-drawable-canvas,
@@ -71,13 +86,14 @@ def canvas_image_to_model_input(canvas_image_data: np.ndarray) -> np.ndarray:
             "Ensure the canvas component is configured to output RGBA."
         )
 
-    # Use the alpha channel rather than converting RGB to grayscale.
-    # The canvas background is fully transparent (alpha=0) and the user's
-    # stroke is fully opaque (alpha=255). This is the cleanest signal.
-    alpha_channel = _extract_alpha_channel(canvas_image_data)
+    # Convert RGB channels to grayscale.
+    # The canvas uses background_color="#000000" (opaque black) and
+    # stroke_color="#FFFFFF" (opaque white), so the grayscale signal
+    # is: 0 where no stroke was drawn, 255 where the user drew.
+    # This is already in MNIST format (white digit on black) — no inversion.
+    gray = cv2.cvtColor(canvas_image_data[:, :, :3], cv2.COLOR_RGB2GRAY)
 
-    inverted = _invert_for_mnist(alpha_channel)
-    resized = _resize_to_mnist(inverted)
+    resized = _resize_to_mnist(gray)
     normalized = resized.astype(np.float32) / 255.0
 
     return normalized.reshape(1, *IMAGE_SIZE, 1)

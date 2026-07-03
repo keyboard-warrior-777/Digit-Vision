@@ -486,8 +486,8 @@ You are free to use, modify, and distribute this code for any purpose, including
 *Computer Science Student | Aspiring AI Engineer*
 
 [![GitHub](https://img.shields.io/badge/GitHub-keyboard--warrior--777-181717?style=flat-square&logo=github)](https://github.com/keyboard-warrior-777)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-yourprofile-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/yourprofile)
-[![Email](https://img.shields.io/badge/Email-youremail@example.com-EA4335?style=flat-square&logo=gmail)](mailto:youremail@example.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-sarthak--singh--5bba442a8-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/sarthak-singh-5bba442a8/)
+[![Email](https://img.shields.io/badge/Email-singhsarthak2425@gmail.com-EA4335?style=flat-square&logo=gmail)](mailto:singhsarthak2425@gmail.com)
 
 ---
 

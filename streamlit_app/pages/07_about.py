@@ -1,10 +1,10 @@
 """
-About Page — DigitVision.
+About — DigitVision.
 
-Covers the project's motivation, architecture decisions, model comparison
-rationale, training pipeline, and technology stack. Designed as a
-reference you can read before an interview.
+Project overview: motivation, architecture decisions, model comparison,
+training pipeline, and technology stack.
 """
+
 
 from __future__ import annotations
 
@@ -18,34 +18,30 @@ from config.config import AVAILABLE_MODELS, MODEL_DISPLAY_NAMES, MODEL_DESCRIPTI
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.markdown(
-    page_header("About DigitVision", "Architecture · Design decisions · Technology stack", "ℹ️"),
+    page_header("About", "Architecture decisions, engineering rationale, and tech stack", "ℹ️"),
     unsafe_allow_html=True,
 )
 
-# ── What is DigitVision? ──────────────────────────────────────────────────────
+# ── What is DigitVision? ─────────────────────────────────────────────────────────────
 st.markdown(
     """
-    ## What is DigitVision?
+    DigitVision trains three neural architectures on identical data with the same
+    optimiser and evaluation suite. Performance differences are therefore attributable
+    to architecture alone — not to data preparation or training choices.
 
-    DigitVision is a handwritten digit recognition system built with production
-    engineering practices in mind. Unlike a Jupyter notebook experiment, this project
-    is structured, testable, containerised, and documented — the way real ML systems are built.
-
-    **The central question it answers:**
-
-    > *How much does architecture matter when the task is "easy" — and how do you measure that fairly?*
-
-    Three architectures are trained on identical data with the same optimiser and evaluated
-    with the same metrics. This makes performance differences attributable to the architecture
-    alone, not to data or training choices.
-    """,
-    unsafe_allow_html=True,
+    The headline result: the Custom CNN reaches **99.3% accuracy with 75K parameters** —
+    7× fewer than the Dense NN baseline at higher accuracy, because convolutions
+    share weights spatially instead of treating every pixel independently.
+    """
 )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# ── Model architecture section ────────────────────────────────────────────────
-st.markdown("## Model Architectures", unsafe_allow_html=True)
+# ── Model architecture section ───────────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Model Architectures</div>",
+    unsafe_allow_html=True,
+)
 
 arch_data = [
     {
@@ -99,18 +95,18 @@ for arch in arch_data:
         <div class="dv-card" style="border-left:4px solid {arch['colour']};margin-bottom:1rem">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem">
                 <div>
-                    <div style="font-size:1.1rem;font-weight:700;color:#e2e8f0">{arch['name']}</div>
-                    <div style="font-size:0.8rem;color:#64748b">{arch['year']}</div>
+                    <div style="font-size:1.05rem;font-weight:700;color:var(--text-primary)">{arch['name']}</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">{arch['year']}</div>
                 </div>
                 <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
                     <span class="dv-badge dv-badge-info">{arch['params']} params</span>
                     <span class="dv-badge dv-badge-success">{arch['expected_acc']}</span>
                 </div>
             </div>
-            <div style="margin-top:0.75rem;font-size:0.875rem;color:#94a3b8;line-height:1.6">
+            <div style="margin-top:0.75rem;font-size:0.875rem;color:var(--text-secondary);line-height:1.65">
                 {arch['description']}
             </div>
-            <div style="margin-top:0.5rem;font-size:0.8rem;color:#f87171">
+            <div style="margin-top:0.5rem;font-size:0.8rem;color:var(--error)">
                 ⚠ Limitation: {arch['key_limitation']}
             </div>
         </div>
@@ -118,10 +114,13 @@ for arch in arch_data:
         unsafe_allow_html=True,
     )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# ── Why these three models? ───────────────────────────────────────────────────
-st.markdown("## Why These Three Models?")
+# ── Why these three models? ─────────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Why These Three Models?</div>",
+    unsafe_allow_html=True,
+)
 st.markdown(
     """
     The three models form a deliberate **progression** that mirrors real ML research history:
@@ -138,10 +137,13 @@ st.markdown(
     """
 )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# ── Training pipeline ─────────────────────────────────────────────────────────
-st.markdown("## Training Pipeline")
+# ── Training pipeline ─────────────────────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Training Pipeline</div>",
+    unsafe_allow_html=True,
+)
 st.markdown(
     """
     ```
@@ -170,10 +172,13 @@ st.markdown(
     """
 )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# ── Technology stack ──────────────────────────────────────────────────────────
-st.markdown("## Technology Stack")
+# ── Technology stack ───────────────────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Technology Stack</div>",
+    unsafe_allow_html=True,
+)
 
 tech_cols = st.columns(3)
 
@@ -213,10 +218,13 @@ with tech_cols[2]:
         """
     )
 
-st.markdown("<hr style='border-color:#2d3154;margin:1.5rem 0'>", unsafe_allow_html=True)
+st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-# ── Key engineering decisions ─────────────────────────────────────────────────
-st.markdown("## Key Engineering Decisions")
+# ── Key engineering decisions ─────────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Engineering Decisions</div>",
+    unsafe_allow_html=True,
+)
 
 decisions = [
     (
@@ -252,22 +260,24 @@ decisions = [
 ]
 
 for title, detail in decisions:
-    with st.expander(f"📌  {title}"):
+    with st.expander(f"  {title}"):
         st.markdown(f"> {detail}")
 
-st.markdown("<div style='margin-top:2rem'></div>", unsafe_allow_html=True)
+st.markdown("<div style='height:var(--sp-4)'></div>", unsafe_allow_html=True)
 
-# ── Interview quick reference ─────────────────────────────────────────────────
-st.markdown("## Interview Quick Reference")
+# ── Key metrics quick reference ───────────────────────────────────────────────────
+st.markdown(
+    "<div class='dv-section-header'>Key Metrics</div>",
+    unsafe_allow_html=True,
+)
 
 st.markdown(
     info_box(
-        "The key numbers to know by heart for any technical interview:<br><br>"
-        "<strong>Dense NN:</strong> 97.5% accuracy · 530K parameters · No spatial awareness<br>"
-        "<strong>LeNet-5:</strong> 98.5% accuracy · 61K parameters · 1998 architecture<br>"
-        "<strong>Custom CNN:</strong> 99.3% accuracy · 75K parameters · Modern best practices<br><br>"
-        "The Custom CNN achieves the best accuracy with 7× fewer parameters than the Dense NN — "
-        "because convolutional weight sharing is fundamentally more efficient for image data."
+        "<strong>Dense NN</strong> &nbsp;—&nbsp; 97.5% accuracy &middot; 530K parameters &middot; no spatial awareness<br>"
+        "<strong>LeNet-5</strong> &nbsp;—&nbsp; 98.5% accuracy &middot; 61K parameters &middot; 1998 architecture (LeCun et al.)<br>"
+        "<strong>Custom CNN</strong> &nbsp;—&nbsp; 99.3% accuracy &middot; 75K parameters &middot; modern best practices<br><br>"
+        "The Custom CNN is 7× more parameter-efficient than the Dense NN at higher accuracy — "
+        "because convolutional weight sharing scales with kernel size, not image size."
     ),
     unsafe_allow_html=True,
 )

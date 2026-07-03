@@ -2,6 +2,8 @@
 
 > Versioned feature roadmap. This is a living document — items may shift
 > between versions as priorities evolve.
+> 
+> *This roadmap reflects potential future directions rather than guaranteed releases. Priorities may change based on learning goals, community feedback, and available time.*
 
 ---
 

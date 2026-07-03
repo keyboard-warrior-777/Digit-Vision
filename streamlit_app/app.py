@@ -1,15 +1,12 @@
 """
-DigitVision — Streamlit Application Entry Point.
+DigitVision — Application Entry Point & Home Page.
 
-Configures the app-wide Streamlit settings, injects the global CSS,
-adds the project root to sys.path (so all src/ imports work from any page),
-and defines the multi-page navigation using st.navigation().
+Sets up Streamlit page config, injects global CSS, renders the sidebar
+footer, patches the sidebar nav labels via JavaScript, then renders the
+Home page content.
 
 Running:
     streamlit run streamlit_app/app.py
-
-    From the project root — this ensures the working directory is correct
-    for all relative paths in config.py.
 """
 
 from __future__ import annotations
@@ -17,51 +14,32 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-# ── Path setup ────────────────────────────────────────────────────────────────
-# Streamlit adds streamlit_app/ to sys.path automatically (the script directory).
-# We also need the project root so that `from src.xxx import yyy` works in pages.
-# This modification persists for the lifetime of the process, so every page
-# file benefits from it without repeating the setup.
+# ── Project root on sys.path so 'from src.xxx import yyy' works everywhere ───
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from components.styles import get_global_css
+from home_content import render_home_page
 
 # ── Page configuration ────────────────────────────────────────────────────────
-# Must be called before any other Streamlit command.
 st.set_page_config(
     page_title="DigitVision",
     page_icon="🔢",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
-        "Get Help": "https://github.com",
-        "Report a bug": "https://github.com",
+        "Get Help": "https://github.com/keyboard-warrior-777",
+        "Report a bug": "https://github.com/keyboard-warrior-777",
         "About": "DigitVision — Handwritten Digit Recognition with Deep Learning",
     },
 )
 
-# ── Global styles ─────────────────────────────────────────────────────────────
-# Injected once here; persists across all pages in the same session.
+# ── Global CSS ────────────────────────────────────────────────────────────────
 st.markdown(get_global_css(), unsafe_allow_html=True)
-
-# ── Navigation ────────────────────────────────────────────────────────────────
-# st.navigation() gives full control over sidebar labels and icons,
-# unlike the auto-discovery approach which derives names from filenames.
-pages = [
-    st.Page("pages/01_home.py",          title="Home",            icon="🏠", default=True),
-    st.Page("pages/02_recognize.py",     title="Digit Recognition", icon="🎨"),
-    st.Page("pages/03_playground.py",    title="Model Playground",  icon="🔬"),
-    st.Page("pages/04_analytics.py",     title="Analytics",         icon="📊"),
-    st.Page("pages/05_cnn_explainer.py", title="How CNN Thinks",    icon="🧠"),
-    st.Page("pages/06_dataset.py",       title="Dataset Explorer",  icon="🗂️"),
-    st.Page("pages/07_about.py",         title="About",             icon="ℹ️"),
-]
-
-pg = st.navigation(pages)
 
 # ── Sidebar footer ────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -69,14 +47,88 @@ with st.sidebar:
     st.markdown(
         """
         <div style='text-align:center;padding:0.5rem'>
-            <div style='font-size:0.7rem;color:#64748b;line-height:1.6'>
-                DigitVision v1.0.0<br>
-                Built with TensorFlow &amp; Streamlit<br>
-                <span style='color:#6366f1'>★</span> Star on GitHub
+            <div style='font-size:0.75rem;color:#7c8aaa;line-height:1.8'>
+                DigitVision &nbsp;&middot;&nbsp; v1.0.0<br>
+                TensorFlow &amp; Streamlit<br>
+                <a href='https://github.com/keyboard-warrior-777'
+                   target='_blank'
+                   style='color:#6366f1;text-decoration:none;font-weight:500'>
+                    github.com/keyboard-warrior-777
+                </a>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-pg.run()
+# ── Sidebar nav patch (JavaScript) ───────────────────────────────────────────
+# In Streamlit 1.35 classic multipage the entry script always appears as the
+# first sidebar nav item labelled "app".  CSS selectors are unreliable because
+# the exact href / data-testid varies by build.  This script targets by TEXT
+# CONTENT instead and is therefore version-agnostic.
+#
+# What it does:
+#   1. Hides the "app" nav link (the entry-point item).
+#   2. Capitalises "home" → "Home" so the sidebar reads naturally.
+#   3. Installs a MutationObserver so the patch survives Streamlit's React
+#      rerenders even when the user navigates to other pages.
+components.html(
+    """
+    <script>
+    (function () {
+        function patchNav() {
+            try {
+                var doc = window.parent.document;
+
+                // Walk every anchor/button/span in the document.
+                // Streamlit 1.35 renders nav links as <a> tags inside <li> items.
+                var els = doc.querySelectorAll('a, button, span');
+                els.forEach(function (el) {
+                    var raw = el.childNodes.length === 1
+                        ? (el.firstChild.nodeValue || el.textContent || '')
+                        : (el.textContent || '');
+                    var text = raw.trim();
+
+                    if (text === 'app') {
+                        // Hide the "app" entrypoint entry and its parent <li>.
+                        var li = el.closest('li');
+                        if (li) {
+                            li.style.cssText += ';display:none!important;';
+                        } else {
+                            el.style.cssText += ';display:none!important;';
+                        }
+                    }
+
+                    if (text === 'home') {
+                        // Capitalise "home" → "Home" so sidebar reads naturally.
+                        if (el.firstChild && el.firstChild.nodeType === Node.TEXT_NODE) {
+                            el.firstChild.nodeValue = 'Home';
+                        } else {
+                            el.textContent = 'Home';
+                        }
+                    }
+                });
+            } catch (e) {
+                // Cross-frame access may be blocked in some environments — fail silently.
+            }
+        }
+
+        // Run immediately (catches elements already in DOM).
+        patchNav();
+
+        // Re-run whenever React updates the DOM.
+        try {
+            new MutationObserver(patchNav).observe(
+                window.parent.document.body,
+                { childList: true, subtree: true }
+            );
+        } catch (e) {}
+    })();
+    </script>
+    """,
+    height=0,
+    scrolling=False,
+)
+
+# ── Home page content ─────────────────────────────────────────────────────────
+render_home_page()

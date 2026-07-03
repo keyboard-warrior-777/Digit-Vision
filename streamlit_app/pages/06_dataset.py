@@ -53,7 +53,7 @@ def _make_class_grid(images: np.ndarray, labels: np.ndarray, digit: int, n: int 
 st.markdown(
     page_header(
         "Dataset Explorer",
-        "Browse MNIST — 70,000 handwritten digit images across 10 classes",
+        "MNIST at a glance — class distribution, sample images, and pixel statistics",
         "🗂️",
     ),
     unsafe_allow_html=True,
@@ -77,9 +77,8 @@ with c4:
 st.markdown("<div style='margin-top:0.5rem'></div>", unsafe_allow_html=True)
 st.markdown(
     info_box(
-        "MNIST (Modified National Institute of Standards and Technology) was created in 1998. "
-        "It is the <em>de facto</em> benchmark for digit recognition. Each image is a "
-        "grayscale 28×28 pixel scan of a handwritten digit, normalised and centred."
+        "MNIST (Modified National Institute of Standards and Technology, 1998) is the standard "
+        "benchmark for digit recognition. Each image is a grayscale 28×28 scan, normalised and centred."
     ),
     unsafe_allow_html=True,
 )
@@ -158,7 +157,7 @@ for digit in selected_digits:
             unsafe_allow_html=True,
         )
     with col_grid:
-        st.image(grid_image, use_container_width=False)
+        st.image(grid_image, use_column_width="always")
 
 st.markdown("<div style='margin-top:2rem'></div>", unsafe_allow_html=True)
 

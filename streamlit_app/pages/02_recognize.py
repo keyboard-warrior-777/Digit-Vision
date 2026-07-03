@@ -49,7 +49,7 @@ def _load_model(model_name: str):
 # ─────────────────────────────────────────────────────────────────────────────
 
 st.markdown(
-    page_header("Digit Recognition", "Draw or upload a handwritten digit to classify", "🎨"),
+    page_header("Digit Recognition", "Draw or upload a digit — select a model and run inference", "🎨"),
     unsafe_allow_html=True,
 )
 
@@ -64,17 +64,26 @@ if not available:
 
 # ── Sidebar — model selector ──────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🔧 Settings")
+    st.markdown(
+        "<div style='font-size:0.72rem;font-weight:700;text-transform:uppercase;"
+        "letter-spacing:0.1em;color:var(--text-muted);padding:0.5rem 0 0.75rem'>⚙ Settings</div>",
+        unsafe_allow_html=True,
+    )
     selected_model = st.selectbox(
         "Model",
         options=available,
         format_func=lambda n: MODEL_DISPLAY_NAMES[n],
         help="Select which trained model to use for prediction.",
     )
-    st.markdown("<hr style='border-color:#2d3154'>", unsafe_allow_html=True)
     st.markdown(
-        f"**Selected:** {MODEL_DISPLAY_NAMES[selected_model]}",
-        help="Change above to switch models.",
+        "<div class='divider'></div>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f"<div style='font-size:0.8rem;color:var(--text-muted)'>"
+        f"Active: <span style='color:var(--text-primary);font-weight:600'>"
+        f"{MODEL_DISPLAY_NAMES[selected_model]}</span></div>",
+        unsafe_allow_html=True,
     )
 
 # ── Input tabs ────────────────────────────────────────────────────────────────
@@ -84,8 +93,7 @@ tab_draw, tab_upload = st.tabs(["✏️  Draw a Digit", "📁  Upload an Image"]
 with tab_draw:
     st.markdown(
         info_box(
-            "Draw a digit (0–9) in the black canvas below using your mouse or touchpad. "
-            "The model predicts in real time after you release the stroke."
+            "Draw a digit (0–9) on the canvas, then click <strong>Predict</strong>."
         ),
         unsafe_allow_html=True,
     )
@@ -112,7 +120,7 @@ with tab_draw:
     with col_result:
         should_predict = (
             canvas_result.image_data is not None
-            and canvas_result.image_data.sum() > 0
+            and canvas_result.image_data[:, :, :3].sum() > 0
             and st.session_state.get("trigger_canvas_predict", False)
         )
 
@@ -133,15 +141,24 @@ with tab_draw:
                 unsafe_allow_html=True,
             )
 
-            st.markdown("<div style='margin-top:1.25rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:var(--sp-3)'></div>", unsafe_allow_html=True)
             st.plotly_chart(
                 build_confidence_bar_chart(result.all_probabilities, result.predicted_digit),
                 use_container_width=True,
             )
 
+            # Top-3 predictions
+            sorted_probs = sorted(
+                result.all_probabilities.items(),
+                key=lambda x: -x[1],
+            )[:3]
+            top3_cols = st.columns(3)
+            for tcol, (digit, prob) in zip(top3_cols, sorted_probs):
+                tcol.metric(f"#{sorted_probs.index((digit, prob)) + 1} Digit {digit}", f"{prob:.1%}")
+
             # Grad-CAM — only for CNN models
             if selected_model != "dense_nn":
-                st.markdown("**Grad-CAM — What the model attended to:**")
+                st.markdown("**Grad-CAM — attended regions:**")
                 model = _load_model(selected_model)
                 from src.preprocessing import canvas_image_to_model_input
                 model_input = canvas_image_to_model_input(canvas_result.image_data)
@@ -154,11 +171,13 @@ with tab_draw:
                         st.image(
                             Image.fromarray(display_img, "L").resize((140, 140), Image.NEAREST),
                             caption="Preprocessed Input",
+                            width=140,
                         )
                     with col_heat:
                         st.image(
                             Image.fromarray(overlay).resize((140, 140), Image.NEAREST),
                             caption="Grad-CAM Heatmap",
+                            width=140,
                         )
             else:
                 st.markdown(
@@ -191,9 +210,8 @@ with tab_draw:
 with tab_upload:
     st.markdown(
         info_box(
-            "Upload a PNG, JPEG, or BMP image containing a handwritten digit. "
-            "The image can be any size — it will be automatically resized to 28×28 "
-            "and converted to MNIST format before prediction."
+            "Upload any PNG, JPEG, or BMP containing a handwritten digit. "
+            "Any resolution is accepted — it will be resized to 28×28 and converted to MNIST format."
         ),
         unsafe_allow_html=True,
     )
@@ -231,11 +249,20 @@ with tab_upload:
                 unsafe_allow_html=True,
             )
 
-        st.markdown("<div style='margin-top:1rem'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:var(--sp-2)'></div>", unsafe_allow_html=True)
         st.plotly_chart(
             build_confidence_bar_chart(result.all_probabilities, result.predicted_digit),
             use_container_width=True,
         )
+
+        # Top-3 predictions for upload tab
+        sorted_probs_up = sorted(
+            result.all_probabilities.items(),
+            key=lambda x: -x[1],
+        )[:3]
+        top3u_cols = st.columns(3)
+        for tcol, (digit, prob) in zip(top3u_cols, sorted_probs_up):
+            tcol.metric(f"#{sorted_probs_up.index((digit, prob)) + 1} Digit {digit}", f"{prob:.1%}")
 
         # Grad-CAM for CNN models
         if selected_model != "dense_nn":
@@ -251,9 +278,11 @@ with tab_upload:
                     st.image(
                         Image.fromarray(display, "L").resize((140, 140), Image.NEAREST),
                         caption="28×28 Input",
+                        width=140,
                     )
                 with col_h:
                     st.image(
                         Image.fromarray(overlay).resize((140, 140), Image.NEAREST),
                         caption="Grad-CAM",
+                        width=140,
                     )

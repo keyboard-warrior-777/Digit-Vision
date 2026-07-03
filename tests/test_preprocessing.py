@@ -70,21 +70,21 @@ class TestCanvasImageToModelInput:
         assert result.min() >= 0.0, f"Min value {result.min()} < 0"
         assert result.max() <= 1.0, f"Max value {result.max()} > 1"
 
-    def test_blank_canvas_produces_white_background(self, blank_canvas_rgba: np.ndarray) -> None:
+    def test_blank_canvas_produces_zero_tensor(self, blank_canvas_rgba: np.ndarray) -> None:
         """
-        What: A blank (all-zero alpha) canvas produces an all-white tensor (max = 1.0).
-        Why:  The canvas pipeline inverts the alpha channel: alpha=0 (no stroke)
-              maps to 255 (white background), and alpha=255 (stroke) maps to 0
-              (black digit). This matches MNIST format: white digit on black, or
-              here, white background where nothing was drawn.
-              The UI handles blank canvas by showing a 'please draw' prompt.
-        Prevents: Misunderstanding the inversion direction causing wrong test assertions.
+        What: A blank canvas (all-black RGB, no stroke drawn) produces an
+              all-zero output tensor (0.0 everywhere).
+        Why:  With the RGB grayscale approach, background pixels are
+              black (RGB=0) -> grayscale=0 -> normalized=0.0. A blank
+              canvas with no stroke drawn should produce a zero tensor.
+              The UI prevents blank-canvas predictions with a sum>0 check.
+        Prevents: Misunderstanding the direction of the preprocessing output.
         """
         result = canvas_image_to_model_input(blank_canvas_rgba)
         assert result.shape == (1, 28, 28, 1)
-        # Blank canvas: alpha=0 everywhere → inverted to 255 → normalized to 1.0
-        assert result.min() == 1.0, (
-            f"Blank canvas should produce all-white output (1.0), got min={result.min()}"
+        # Blank canvas: all RGB=0 -> grayscale=0 -> normalized=0.0
+        assert result.max() == 0.0, (
+            f"Blank canvas should produce all-zero output (0.0), got max={result.max()}"
         )
 
     def test_invalid_shape_rgb_raises_value_error(self) -> None:
@@ -136,32 +136,35 @@ class TestCanvasImageToModelInput:
         result = canvas_image_to_model_input(large_canvas)
         assert result.shape == (1, 28, 28, 1)
 
-    def test_inversion_is_applied(self) -> None:
+    def test_stroke_appears_bright_in_output(self) -> None:
         """
-        What: The alpha channel is inverted so the background is bright and the stroke is dark.
-        Why:  The canvas pipeline inverts the alpha: alpha=0 (background, no stroke)
-              → 255 (white). alpha=255 (stroke, the user's digit) → 0 (black).
-              This matches MNIST format: white background with black digit.
-              The non-stroke region should be bright (close to 1.0) in the output.
-        Prevents: The most common demo bug: skipping inversion → all predictions wrong.
+        What: A white RGB stroke on a black background appears bright (near 1.0)
+              in the output tensor, and the background appears dark (near 0.0).
+        Why:  The canvas pipeline converts RGB to grayscale without inversion.
+              Stroke pixels (R=255, G=255, B=255) -> grayscale=255 -> 1.0.
+              Background pixels (R=0, G=0, B=0) -> grayscale=0 -> 0.0.
+              This matches MNIST format: white digit on black background.
+        Prevents: The most common demo bug: wrong signal polarity causing all
+                  predictions to be the same regardless of what is drawn.
         """
-        # Canvas with maximum-alpha stroke only in the bottom-right quadrant.
-        # Top-left is all-zero alpha (no stroke) = background.
+        # Canvas with white RGB stroke only in the bottom-right quadrant.
+        # Top-left is all-black RGB (no stroke) = background.
         canvas = np.zeros((280, 280, 4), dtype=np.uint8)
-        canvas[140:, 140:, 3] = 255  # stroke in bottom-right only
+        canvas[:, :, 3] = 255  # all pixels opaque (opaque black BG)
+        canvas[140:, 140:, 0] = 255  # white stroke in bottom-right (R)
+        canvas[140:, 140:, 1] = 255  # white stroke in bottom-right (G)
+        canvas[140:, 140:, 2] = 255  # white stroke in bottom-right (B)
         result = canvas_image_to_model_input(canvas)
-        # Top-left of 28x28 output corresponds to top-left of canvas (no stroke).
-        # After inversion: alpha=0 → 255 → normalized 1.0 → background should be bright.
+        # Top-left corresponds to background (black RGB -> grayscale=0 -> 0.0).
         top_left_mean = result[0, :14, :14, 0].mean()
-        assert top_left_mean > 0.9, (
-            f"Non-stroke background region should be near 1.0 after inversion, "
+        assert top_left_mean < 0.1, (
+            f"Background region should be near 0.0 (black), "
             f"got mean={top_left_mean:.3f}"
         )
-        # Bottom-right of 28x28 output corresponds to bottom-right of canvas (stroke).
-        # After inversion: alpha=255 → 0 → normalized 0.0 → stroke should be dark.
+        # Bottom-right corresponds to stroke (white RGB -> grayscale=255 -> 1.0).
         bottom_right_mean = result[0, 14:, 14:, 0].mean()
-        assert bottom_right_mean < 0.1, (
-            f"Stroke region should be near 0.0 after inversion (dark digit), "
+        assert bottom_right_mean > 0.9, (
+            f"Stroke region should be near 1.0 (white), "
             f"got mean={bottom_right_mean:.3f}"
         )
 
